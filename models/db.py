@@ -81,3 +81,147 @@ use_janrain(auth, filename='private/janrain.key')
 
 ## after defining tables, uncomment below to enable auditing
 # auth.enable_record_versioning(db)
+
+'''
+This table contains various variables tied to the administrator interface.For example, the active semester, number of days a customer should be able to see rebooking leasons.
+'''
+
+db.define_table("admin_settings",
+    SQLField("variable_name", "string", notnull=True),
+    SQLField("variable_value","string"))
+
+
+"""
+Correlates to a customers level of riding experience and/or type. A customer is tied to a skill level by the leasons that they are in. A leason is tied to a skill level directly. The skill_point works so that if a customer is tied to a skill_level with a skill_point of 4, they can get rebooked into any leasons with skill_point =< 4
+At skill_point of 0 for a leason, any customer can book it.
+"""
+db.define_table("skill_level",
+      SQLField("skill_name", "string", notnull=True, default=None),
+      SQLField("skill_point", "integer", requires=IS_IN_SET(range(1,50))),
+      SQLField("skill_type", "string", requires=IS_IN_SET(["Ponny","Häst","Blandad"])))
+
+
+db.define_table("customer",
+      SQLField("name", "string", notnull=True, default=None),
+      SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'))
+
+"""
+Here we define semesters
+"""
+db.define_table("semester",
+      SQLField("name", "string", notnull=True, default=None),
+      SQLField("start_date", "date", notnull=True, default=None),
+      SQLField("end_date", "date", notnull=True, default=None))
+
+"""
+The purpose of this table is to contain one row, with the id of the currently activated semester.
+******THIS SHOULD BE MIGRATED TO THE TABLE admin_settings!!!!******
+"""
+
+db.define_table("active_semester",
+      SQLField("id_semester", db.semester))
+
+
+
+
+"""
+A leason is created in this table. It is tied to a semester and a skill level.
+"""
+db.define_table("leason",
+      SQLField("id_semester", db.semester),
+      SQLField("week_day", requires=IS_IN_SET(['Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag','Söndag'])),
+      SQLField("leason_time", "time", notnull=True, default=None),
+      SQLField("max_customers", "integer", notnull=True, default=None),
+      SQLField("skill_level", db.skill_level),
+      SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'),
+      SQLField("leason_type", "string", requires=IS_IN_SET(['Ponny','Häst','Blandad']), default=None))
+
+
+"""
+The table that ties one customer to its leasons(one to many)
+"""
+db.define_table("leasons",
+      SQLField("id_customer", db.customer),
+      SQLField("id_leason", db.leason))
+
+
+
+"""
+Table definition
+"""
+db.define_table("leasons_history",
+      SQLField("id_customer", "integer", notnull=True, default=None),
+      SQLField("id_leason", "integer", notnull=True, default=None),
+      SQLField("id_semester", "integer", notnull=True, default=None),
+      SQLField("id_horse", "integer", notnull=True, default=None),
+      SQLField("id_rebooking", "integer", notnull=True, default=None),
+      SQLField("leason_date", "date", notnull=True, default=None))
+
+
+
+"""
+Table definition
+"""
+db.define_table("cancelled_leasons",
+      SQLField("id_customer", db.customer),
+      SQLField("id_leason", db.leason),
+      SQLField("cancelled_date", "date", notnull=True, default=None),
+      SQLField("when_cancelled", "datetime", notnull=True, default=None))
+
+
+"""
+The table rebooking is used for customers to request and be confirmed into rerides, or rebookings.
+When the customer requests an available rebooking slot it enters this table, with an approved 
+status of "notyet". That will display it in the instructors admin view, allowing the 
+instructor approve the rebooking request(approved slot to "yes") or deny it (approved
+slot to "no") and enter a deny_message informing the customer why they could not get
+the available leason.
+"""
+db.define_table("rebooking",
+      SQLField("id_leason", db.leason),
+      SQLField("id_customer", db.customer),
+      SQLField("leason_date", "date", notnull=True, default=None),
+      SQLField("approval", requires=IS_IN_SET(['notyet','yes','no']), default='notyet'),
+      SQLField("deny_message", "string"))
+
+
+"""
+Table definition
+"""
+db.define_table("horse",
+      SQLField("name", "string", notnull=True, default=None),
+      SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'),
+      SQLField("horse_type", "string", requires=IS_IN_SET(['Ponny','Häst']), default=None))
+
+"""
+Table definition
+"""
+db.define_table("reserved_horses",
+      SQLField("id_customer", db.customer),
+      SQLField("id_horse", db.horse),
+      SQLField("id_leason", db.leason),
+      SQLField("reserved_date", "date", notnull=True, default=None))
+
+
+
+"""
+Table definition
+"""
+db.define_table("black_dates",
+      SQLField("id_semester", db.semester),
+      SQLField("black_date", "date", notnull=True, default=None))
+
+      
+      
+db.leason.id_semester.requires=IS_IN_DB(db, 'semester.id')
+db.leasons.id_customer.requires=IS_IN_DB(db, 'customer.id')
+db.leasons.id_leason.requires=IS_IN_DB(db, 'leason.id')
+db.reserved_horses.id_customer.requires=IS_IN_DB(db, 'customer.id')
+db.reserved_horses.id_horse.requires=IS_IN_DB(db, 'horse.id')
+db.reserved_horses.id_leason.requires=IS_IN_DB(db, 'leason.id')
+db.black_dates.id_semester.requires=IS_IN_DB(db, 'semester.id')
+db.cancelled_leasons.id_customer.requires=IS_IN_DB(db, 'customer.id')
+db.cancelled_leasons.id_leason.requires=IS_IN_DB(db, 'leason.id')
+db.rebooking.id_leason.requires=IS_IN_DB(db, 'leason.id')
+db.rebooking.id_customer.requires=IS_IN_DB(db, 'customer.id')
+db.leason.skill_level.requires=IS_IN_DB(db, 'skill_level.id')
