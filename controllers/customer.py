@@ -5,25 +5,9 @@
 #
 
 def index(): 
-    cust_id = request.args(0)
-    #
-    # The list for leasons we will pass back. DONT FORGET TO CHECK SEMESTER
-    cust_leasons = []
-
-    query = db.leasons.id_customer==cust_id
-    try:
-        leasons = db(query).select()
-    except:
-        cust_leasons.append("UhoH")
-
-    if len(leasons) > 0:        
-        for leason in leasons:
-            cust_leasons.append(db.leason[leason['id_leason']])
-    else:
-        cust_leasons.append("SKIT INGA LEKTIONER FÖR FAN")
-
+	message = "There is nothing here.... ALBATROSS!"
     
-    return dict(message=cust_leasons)
+    return dict(message=message)
 
 def list_rebookings():
     # Watching execution time to try to catch resource hogs as I add them
