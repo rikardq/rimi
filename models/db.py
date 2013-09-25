@@ -82,19 +82,24 @@ use_janrain(auth, filename='private/janrain.key')
 ## after defining tables, uncomment below to enable auditing
 # auth.enable_record_versioning(db)
 
-'''
-This table contains various variables tied to the administrator interface.For example, the active semester, number of days a customer should be able to see rebooking leasons.
-'''
+
+# This table contains various variables tied to the administrator interface.
+# For example, the active semester, number of days a customer should be able to see rebooking leasons.
+
 
 db.define_table("admin_settings",
     SQLField("variable_name", "string", notnull=True),
     SQLField("variable_value","string"))
 
 
-"""
-Correlates to a customers level of riding experience and/or type. A customer is tied to a skill level by the leasons that they are in. A leason is tied to a skill level directly. The skill_point works so that if a customer is tied to a skill_level with a skill_point of 4, they can get rebooked into any leasons with skill_point =< 4
-At skill_point of 0 for a leason, any customer can book it.
-"""
+
+# Correlates to a customers level of riding experience and/or type. 
+# A customer is tied to a skill level by the leasons that they are in. 
+# A leason is tied to a skill level directly. The skill_point works so 
+# that if a customer is tied to a skill_level with a skill_point of 4, 
+# they can get rebooked into any leasons with skill_point =< 4
+# At skill_point of 0 for a leason, any customer can book it.
+
 db.define_table("skill_level",
       SQLField("skill_name", "string", notnull=True, default=None),
       SQLField("skill_point", "integer", requires=IS_IN_SET(range(1,50))),
@@ -105,28 +110,20 @@ db.define_table("customer",
       SQLField("name", "string", notnull=True, default=None),
       SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'))
 
-"""
-Here we define semesters
-"""
+
+#Here we define semesters
 db.define_table("semester",
       SQLField("name", "string", notnull=True, default=None),
       SQLField("start_date", "date", notnull=True, default=None),
       SQLField("end_date", "date", notnull=True, default=None))
 
-"""
-The purpose of this table is to contain one row, with the id of the currently activated semester.
-******THIS SHOULD BE MIGRATED TO THE TABLE admin_settings!!!!******
-"""
 
+#The purpose of this table is to contain one row, with the id of the currently activated semester.
+#******THIS SHOULD BE MIGRATED TO THE TABLE admin_settings!!!!******
 db.define_table("active_semester",
       SQLField("id_semester", db.semester))
 
-
-
-
-"""
-A leason is created in this table. It is tied to a semester and a skill level.
-"""
+#A leason is created in this table. It is tied to a semester and a skill level.
 db.define_table("leason",
       SQLField("id_semester", db.semester),
       SQLField("week_day", requires=IS_IN_SET(['Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag','Söndag'])),
@@ -137,18 +134,14 @@ db.define_table("leason",
       SQLField("leason_type", "string", requires=IS_IN_SET(['Ponny','Häst','Blandad']), default=None))
 
 
-"""
-The table that ties one customer to its leasons(one to many)
-"""
+#The table that ties one customer to its leasons(one to many)
 db.define_table("leasons",
       SQLField("id_customer", db.customer),
       SQLField("id_leason", db.leason))
 
 
 
-"""
-Table definition
-"""
+#Table definition
 db.define_table("leasons_history",
       SQLField("id_customer", "integer", notnull=True, default=None),
       SQLField("id_leason", "integer", notnull=True, default=None),
