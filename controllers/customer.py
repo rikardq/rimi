@@ -24,6 +24,8 @@ def list_rebookings():
     ''' Define Function Here
     '''
     # The cust_id is the first argument in calling this function
+    # But this is really bad. Uberbad. Do not do this. Query the database for the currently
+    # logged in users user_id variable directly instead.
     cust_id = request.args(0)
 
     #Aquire customers skill level
@@ -168,6 +170,9 @@ def list_leasondates():
     black_dates = get_black_dates(active_semester)
 
     # The cust_id is the first argument in calling this function
+    # The cust_id is the first argument in calling this function
+    # But this is really bad. Uberbad. Do not do this. Query the database for the currently
+    # logged in users user_id variable directly instead.
     cust_id = request.args(0)
 
     # Get start and end dates for the active semester
