@@ -5,8 +5,7 @@
 #
 
 def index(): 
-	message = "There is nothing here.... ALBATROSS!"
-    
+    message = "There is nothing here.... ALBATROSS!"
     return dict(message=message)
 
 def list_rebookings():
