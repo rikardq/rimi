@@ -1,0 +1,18 @@
+{{extend 'layout.html'}}
+<h1>This is the customerCalendar.html template</h1>
+<b>In laddad kalender för en-GB språk, fel på rad 542 i calender.js tooltip fanns ej :/</b>
+
+<div id="calendar"></div>
+
+    <script type="text/javascript">
+        console.log("Init calendar");
+        var cal = $('#calendar');
+        var options =  {
+                        tmpl_path: "/rimi/static/calendar-templates/",
+                        language:"en-GB",
+                        view: 'week',
+                        events_url:'/rimi/customer/events.json'
+                        };
+        cal.calendar(options);
+    </script>
+{{=BEAUTIFY(response._vars)}}
