@@ -18,9 +18,19 @@ def list_rebookings():
     cust_id = request.args(0)
 
     #Aquire customers skill level
+    # At the same time, generate a list of the customers leasons ID. this will be used later to 
+    # exclude the customers own leasons, since they are not available for rebookings.
+    customer_leasons = [] 
     try:
+        # See if the customer has any leasons assigned
         res = db(db.leasons.id_customer==cust_id).select(db.leasons.id_leason)
         if len(res) > 0:
+            # While we have this data , generate a list of the customers leasons ID. this will be used later to 
+            # exclude the customers own leasons, since they are not available for rebookings.
+            for row in res:
+                customer_leasons.append(row.id_leason)
+
+            # Defining the query here, not running it yet.
             # Select the customer from leasons, the leasons from leason and the skill_level from skill_Level....!
             q = (db.leasons.id_customer==cust_id)&(db.leasons.id_leason==db.leason.id)&(db.leason.skill_level==db.skill_level.id)
             try:
@@ -82,31 +92,17 @@ def list_rebookings():
                 max_customers = row["leason.max_customers"]
                 leason_id = row["leason.id"]
                 # For each leason, find out the active number of riders in this group
-                try:
-                    customers_in_leason = len(db(db.leasons.id_leason==leason_id).select())
-                except:
-                    #Assume it is 0
-                    customers_in_leason = 0
-                leasons.append({"weekday":weekday,"leason_id":leason_id,"customers_in_leason":customers_in_leason,"max_customers":max_customers})
+                # Except if this leason is one that the customer already rides in, he can 
+                # not rebook in a leason he already rides in(how coudl you ride twice
+                # in one leason? It is impossible.
+                if leason_id not in customer_leasons:
+                    try:
+                        customers_in_leason = len(db(db.leasons.id_leason==leason_id).select())
+                    except:
+                        #Assume it is 0
+                        customers_in_leason = 0
+                    leasons.append({"weekday":weekday,"leason_id":leason_id,"customers_in_leason":customers_in_leason,"max_customers":max_customers})
         iterweekday = iterweekday + 1
-
-
-    # Retrieve the cancelled_leasons from the dateperiod we are looking at and popping it into a list
-    # so we can later check against it
-    canx_leasons = []
-    q = (db.cancelled_leasons.cancelled_date >= today)&(db.cancelled_leasons.cancelled_date <= stop_date)
-    rows = db(q).select(db.cancelled_leasons.id_leason,db.cancelled_leasons.when_cancelled)
-    if len(rows) > 0:
-        for row in rows:
-            canx_leasons.append({"id_leason":row["id_leason"], "when_cancelled":row["when_cancelled"]})
-
-    # Retrieve any rebooked leasons during the time period, and store it in a list for later checks.
-    rebooked_leasons = []
-    q = (db.rebooking.leason_date >= today)&(db.rebooking.leason_date <= stop_date)
-    rows = db(q).select(db.rebooking.id_leason,db.rebooking.leason_date)
-    if len(rows) > 0:
-        for row in rows:
-            rebooked_leasons.append({"id_leason":row["id_leason"], "leason_date":row["leason_date"]})
 
     #  leason_max_riders - customers_who_ride - rerides + cancellations = Available rebookable slots
     # Since all data is now gathered, lets look inside the leasons list and go through each leason
@@ -123,18 +119,18 @@ def list_rebookings():
             while first_leasondate <= stop_date:
                 # Check to make sure it is not in black dates 
                 if first_leasondate not in black_dates:
-                    arne=1
                     # Now check to see if there are any cancelled leasons for this date and leason
-                    cancelled_leasons = 0
+                    cancelled_leasons = len(db((db.cancelled_leasons.cancelled_date == first_leasondate) & (db.cancelled_leasons.id_leason == leason["leason_id"])).select(db.cancelled_leasons.id))
+
                     # Then check to see if there are any rebooked leasons for this date and leason
-                    rebooked_leasons = 0
+                    rebooked_leasons = len(db((db.rebooking.leason_date == first_leasondate) & (db.rebooking.id_leason == leason["leason_id"])).select(db.rebooking.id))
                     # Then do
                     available_rebooking_slots = leason["max_customers"] - rebooked_leasons + cancelled_leasons 
                     # Append
-                    rebookable_dates.append({"Leason ID":leason["leason_id"],"Date":first_leasondate,"slots":available_rebooking_slots})
-                    
-                    
-
+                    rebookable_dates.append({"Leason ID":leason["leason_id"],"Date":first_leasondate,"slots":available_rebooking_slots,"cancelled_leasons":cancelled_leasons,"rebooked_leasons":rebooked_leasons})
+                #i#    
+                #    
+                #
                 first_leasondate = first_leasondate + datetime.timedelta(days=7)
     else:
         #oekr
@@ -146,7 +142,7 @@ def list_rebookings():
 
     # End the function by returning data
     timez.append(time.time())
-    return dict(message=shit_list,blackdates=black_dates,leasons=leasons,timez=timez,canx_leasons=canx_leasons,rebooked_leasons=rebooked_leasons,rebookable_dates=rebookable_dates)
+    return dict(message=shit_list,blackdates=black_dates,leasons=leasons,timez=timez,rebookable_dates=rebookable_dates,customer_leasons=customer_leasons)
         
 def list_leasondates():
     '''
