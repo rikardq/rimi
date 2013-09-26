@@ -64,3 +64,39 @@ def get_black_dates(active_semester):
         for entry in s:
             xleasons.append(entry["black_date"])
     return xleasons
+
+
+# A function to retrieve a date for the first weekday entry from start_date 
+# i.e if it is september 3rd, a tuesday today and our weekday is thursday
+# then return the date september 5th
+# The argument are: 
+# weekday, a numeric value representing a day,0=mon, 6=sun
+# start_date, a datetime.date variable containing what we consider to be "today" 
+def get_firstdate_weekday(weekday,start_date):
+    # Figure out what the start_dates weekday is
+    start_date_weekday = start_date.weekday()
+    # Add 1 to the weekday we were passed. Also add 1 to the start_date_weekday
+    # so they match. Math is hard when Monday is 0    
+    weekday = weekday + 1
+    start_date_weekday = start_date_weekday + 1
+    # There are 3 possibilites, the weekday is before the start_date_weekday
+    # or it is the same, or it is after. If it is the same, the start_date
+    # remains the same
+    if weekday == start_date_weekday:
+        days_to_add = 0
+    # If it is before, figure out the diff and then subtract the diff
+    # from a full week. Adding this to start_date gets you the next "hit"
+    # of that weekday 
+    elif start_date_weekday > weekday:
+        days_differ = start_date_weekday - weekday
+        days_to_add = 7 - days_differ
+    # If it is after, we simply subtract it
+    elif start_date_weekday < weekday:
+        days_to_add = weekday - start_date_weekday
+
+    # Now we know how many days to add to start_date to get the next
+    # available date that is a weekday
+    start_date = start_date + datetime.timedelta(days=days_to_add)
+    return start_date
+    
+
