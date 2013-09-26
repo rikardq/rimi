@@ -110,11 +110,32 @@ def list_rebookings():
 
     #  leason_max_riders - customers_who_ride - rerides + cancellations = Available rebookable slots
     # Since all data is now gathered, lets look inside the leasons list and go through each leason
+    # adding what we find to rebookable_dates
+    rebookable_dates = []
     if len(leasons) > 0: 
         for leason in leasons:
-            arne = 1 + 3
-            # Now go through the dates that are possible for this weekday, in the timespan as specifed
-            # by today and stop_date
+            # Translate the literal swedish weekday to a numeric one 
+            weekday = reverse_translate_weekday(leason["weekday"])
+            today=datetime.date(year=datetime.datetime.now().year,month=datetime.datetime.now().month,day=datetime.datetime.now().day)
+            # What is the first date for this weekday, counting from today?
+            first_leasondate = get_firstdate_weekday(weekday, today)
+            # Now we have our starting point, and while loop through it until we hit the stop_date 
+            while first_leasondate <= stop_date:
+                # Check to make sure it is not in black dates 
+                if first_leasondate not in black_dates:
+                    arne=1
+                    # Now check to see if there are any cancelled leasons for this date and leason
+                    cancelled_leasons = 0
+                    # Then check to see if there are any rebooked leasons for this date and leason
+                    rebooked_leasons = 0
+                    # Then do
+                    available_rebooking_slots = leason["max_customers"] - rebooked_leasons + cancelled_leasons 
+                    # Append
+                    rebookable_dates.append({"Leason ID":leason["leason_id"],"Date":first_leasondate,"slots":available_rebooking_slots})
+                    
+                    
+
+                first_leasondate = first_leasondate + datetime.timedelta(days=7)
     else:
         #oekr
         arne = 1 + 2
@@ -125,7 +146,7 @@ def list_rebookings():
 
     # End the function by returning data
     timez.append(time.time())
-    return dict(message=shit_list,leasons=leasons,timez=timez,canx_leasons=canx_leasons,rebooked_leasons=rebooked_leasons)
+    return dict(message=shit_list,blackdates=black_dates,leasons=leasons,timez=timez,canx_leasons=canx_leasons,rebooked_leasons=rebooked_leasons,rebookable_dates=rebookable_dates)
         
 def list_leasondates():
     '''
