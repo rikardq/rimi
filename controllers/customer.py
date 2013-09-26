@@ -71,7 +71,6 @@ def list_rebookings():
     iterweekday = 0 # This represents monday, for our loop.
     leasons = []
     while iterweekday < 7:
-        shit_list.append(today)
         # Translate the weekday to swedish for db query
         weekday = translate_weekday(iterweekday)
 
@@ -110,9 +109,16 @@ def list_rebookings():
             rebooked_leasons.append({"id_leason":row["id_leason"], "leason_date":row["leason_date"]})
 
     #  leason_max_riders - customers_who_ride - rerides + cancellations = Available rebookable slots
-
     # Since all data is now gathered, lets look inside the leasons list and go through each leason
-    
+    if len(leasons) > 0: 
+        for leason in leasons:
+            arne = 1 + 3
+            # Now go through the dates that are possible for this weekday, in the timespan as specifed
+            # by today and stop_date
+    else:
+        #oekr
+        arne = 1 + 2
+
 
 
 
@@ -146,14 +152,6 @@ def list_leasondates():
     # We also need ot know todays date, in datetime.date format to stay consistent.
     today=datetime.date(year=datetime.datetime.now().year,month=datetime.datetime.now().month,day=datetime.datetime.now().day)
 
-    # start_date is of type datetime.date() .weekday retrieves a numeric value of
-    # the day of the week the date is on. 0=Monday, 6=Sunday
-    start_date_weekday = start_date.weekday()
-
-    # For the purpose of figuring out what the starting date for a particular customer is, we must add 1 to 
-    # the start_date_weekday in order to do proper mathematics. If we do not, monday is 0 and all will fail.
-    start_date_weekday_h = start_date_weekday + 1
-
     # Here we will hold the leason data
     master_leason = []
 
@@ -171,33 +169,10 @@ def list_leasondates():
             # feature.
             leason_weekday = reverse_translate_weekday(leason_data.week_day)
 
-            # For the purpose of figuring out what the starting date for a leason is, we must add 1 to
-            # the leason_weekday in order to do proper mathematics. If we do not, monday is 0 and all will fail.
-            leason_weekday_h = leason_weekday + 1
+            # Call internal function to get the first available DATE for the leasons Weekday
+            leason_start_date = get_firstdate_weekday(leason_weekday, start_date)
             
-            # Now start_date_h and leason_weekday_h uses the scheme 1 = Monday and 7 = Sunday.
-            # The start date for this leason is dependent on the next weekday following the semesters start.
-            # We need to see if and how many days to add to the semesters startdate to achieve this leasons
-            # startdate for the semester
-            
-            # If the semesters weekday is the same as the leasons weekday, we add nothing to the start date
-            if start_date_weekday_h == leason_weekday_h:
-                days_to_add = 0
-                leason_start_date = start_date
-
-            # If the leason weekday is BEFORE the semesters weekday we must figure the difference, and then remove
-            # the difference from a full week.
-            elif start_date_weekday_h > leason_weekday_h:
-                days_differ = start_date_weekday_h - leason_weekday_h
-                days_to_add = 7 - days_differ
-
-            # If the leason weekday is AFTER the semesters weekday we simply subtract it
-            elif start_date_weekday_h < leason_weekday_h:
-                days_to_add = leason_weekday_h - start_date_weekday_h
-
-            # We now add the days to the semesters start date to get this leasons startdate
-            if(days_to_add > 0):
-                leason_start_date = start_date + datetime.timedelta(days=days_to_add)
+            #leason_start_date = start_date + datetime.timedelta(days=days_to_add)
 
             #This is a list for keeping the dates for this leason
             leason_dates = []
