@@ -4,9 +4,17 @@
 #
 #
 
-def index(): 
+def index():
     message = "There is nothing here.... ALBATROSS!"
     return dict(message=message)
+
+"""
+The events is where the calendar widget retrives its events from.
+We should override the call so we can send a customer id etc.
+"""
+def events():
+  # Example on how the calenadar expects its JSON api. Note the "class" attribute we should change it to something like guiclass..
+    return {"success":"1", "result":[{"id":123, "title":"Hopping", "class":"event-important","url":"http://dn.se", "start":1379264400000, "end":1379304060000}]}
 
 def list_rebookings():
     # Watching execution time to try to catch resource hogs as I add them
