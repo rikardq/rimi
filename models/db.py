@@ -89,7 +89,8 @@ use_janrain(auth, filename='private/janrain.key')
 
 db.define_table("admin_settings",
     SQLField("variable_name", "string", notnull=True),
-    SQLField("variable_value","string"))
+    SQLField("variable_value","string"),
+    SQLField("description","string"))
 
 
 
