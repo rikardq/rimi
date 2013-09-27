@@ -111,5 +111,16 @@ def convert_dt_to_epoch(dt,dtt):
     millis = int(secs * 1000)
     return millis
 
-    
+# Check if a cancellation request is requested within the ordered timeframe
+# Returns true if request is within the timeframe specified in admin_settings 
+def check_canx_time(leason_id):
+    leason_time = db(db.leason.id==leason_id).select(db.leason.leason_time)[0]["leason_time"]
+    hours_before_canx = int(db(db.admin_settings.variable_name=="hours_before_canx").select()[0]["variable_value"])
+    last_call = datetime.datetime.today() + datetime.timedelta(hours=hours_before_canx)
+    leason = (datetime.datetime.combine(datetime.date.today(), leason_time))
+    if last_call > leason:
+        return False
+    else:
+        return True
+
     
