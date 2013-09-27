@@ -1,7 +1,6 @@
 syntax: glob
 cache/**
-databases/*
-!c8b669d15150d7109e5f7ab36744a5b7_admin_settings.table
+databases/**
 errors/**
 sessions/**
 *˜
