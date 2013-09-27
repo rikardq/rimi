@@ -22,9 +22,25 @@ sS'type'
 p10
 S'string'
 p11
-ssS'id'
+ssS'description'
 p12
 (dp13
+g4
+I512
+sg5
+I00
+sg6
+I4
+sg7
+S'CHAR(512)'
+p14
+sg9
+I00
+sg10
+g11
+ssS'id'
+p15
+(dp16
 g4
 I512
 sg5
@@ -33,14 +49,15 @@ sg6
 I1
 sg7
 S'INTEGER PRIMARY KEY AUTOINCREMENT'
-p14
+p17
 sg9
 I00
 sg10
-g12
+S'id'
+p18
 ssS'variable_name'
-p15
-(dp16
+p19
+(dp20
 g4
 I512
 sg5
@@ -49,7 +66,7 @@ sg6
 I2
 sg7
 S'CHAR(512) NOT NULL'
-p17
+p21
 sg9
 I01
 sg10
