@@ -98,5 +98,21 @@ def get_firstdate_weekday(weekday,start_date):
     # available date that is a weekday
     start_date = start_date + datetime.timedelta(days=days_to_add)
     return start_date
-    
 
+# Used to convert a datetime.date object into an int representing
+# epoch in milliseconds
+def convert_dt_to_epoch(dt,time_h,time_m):
+    # Convert the time into a datetime.time object
+    dtt = datetime.time(time_h,time_m)
+    # Use the combine function to combine the datetime.date and the now created datetime.time
+    # into a datetime.datetime object. We need to do this since we store all dates in the 
+    # db as datetime.date, which can not be converted to epoch
+    dtdt = datetime.datetime.combine(dt,dtt)
+    # Get epoch in seconds
+    secs = time.mktime(dtdt.timetuple()) + dtdt.microsecond/1000000.0
+    # Get epoch in millis, convert to int
+    millis = int(secs * 1000)
+    return millis
+
+    
+    
