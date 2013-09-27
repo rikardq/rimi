@@ -1,3 +1,4 @@
+import json
 # coding: utf8
 #
 # This is the controller for kund, or customer view. All administration that a end-customer can do with their leasons should reside here.
@@ -97,12 +98,14 @@ def list_rebookings():
 
         # Get a lists of leasons for todays weekday, based on the customers skill_level
         q = (db.leason.week_day==weekday)&(db.leason.skill_level==db.skill_level.id)&(db.skill_level.skill_point <= skill_level)
-        rows = db(q).select(db.leason.id,db.leason.max_customers,db.leason.leason_time)
+        rows = db(q).select(db.leason.max_customers,db.leason.id,db.leason.leason_time,db.leason.week_day,db.leason.leason_time)
         if len(rows) > 0:
             for row in rows:
-                max_customers = row["leason.max_customers"]
-                leason_id = row["leason.id"]
-                leason_time = row["leason_time"]
+                max_customers = row.max_customers 
+                leason_id = row.id
+                leason_time = row.leason_time 
+                week_day = row.week_day 
+                leason_time = row.leason_time 
                 # For each leason, find out the active number of riders in this group
                 # Except if this leason is one that the customer already rides in, he can 
                 # not rebook in a leason he already rides in(how coudl you ride twice
@@ -113,13 +116,15 @@ def list_rebookings():
                     except:
                         #Assume it is 0
                         customers_in_leason = 0
-                    leasons.append({"weekday":weekday,"leason_id":leason_id,"customers_in_leason":customers_in_leason,"max_customers":max_customers,"leason_time":leason_time})
+                    leasons.append({"weekday":weekday,"week_day":week_day,"leason_id":leason_id,"customers_in_leason":customers_in_leason,"max_customers":max_customers,"leason_time":leason_time})
         iterweekday = iterweekday + 1
 
     #  leason_max_riders - customers_who_ride - rerides + cancellations = Available rebookable slots
     # Since all data is now gathered, lets look inside the leasons list and go through each leason
     # adding what we find to rebookable_dates
     rebookable_dates = []
+    # This is our test list for the calender, output in json format
+    json_leasons = []
     if len(leasons) > 0: 
         for leason in leasons:
             # Translate the literal swedish weekday to a numeric one 
@@ -132,7 +137,7 @@ def list_rebookings():
                 # Check to make sure it is not in black dates 
                 if first_leasondate not in black_dates:
                     # Prepare an EPOCH for the date and time of the leason
-                    leason_time=convert_dt_to_epoch(first_leasondate,leason["leason_time"])
+                    leason_time_epoch = convert_dt_to_epoch(first_leasondate,leason["leason_time"])
                     # Now check to see if there are any cancelled leasons for this date and leason
                     cancelled_leasons = len(db((db.cancelled_leasons.cancelled_date == first_leasondate) & (db.cancelled_leasons.id_leason == leason["leason_id"])).select(db.cancelled_leasons.id))
 
@@ -141,8 +146,9 @@ def list_rebookings():
                     # Then do
                     available_rebooking_slots = leason["max_customers"] - rebooked_leasons + cancelled_leasons 
                     # Append
-                    rebookable_dates.append({"Leason ID":leason["leason_id"],"Date":first_leasondate,"slots":available_rebooking_slots,"cancelled_leasons":cancelled_leasons,"rebooked_leasons":rebooked_leasons,"leason_time_epoch":leason_time,"leason_time":leason["leason_time"]})
-                #i#    
+                    rebookable_dates.append({"Leason ID":leason["leason_id"],"Date":first_leasondate,"slots":available_rebooking_slots,"cancelled_leasons":cancelled_leasons,"rebooked_leasons":rebooked_leasons,"leason_time_epoch":leason_time_epoch,"leason_time":leason["leason_time"]})
+                    json_leasons.append({"id:":str(int(time.time()*1000000))[10:],"title":leason["week_day"] + " " + str(leason["leason_time"]),"url":URL('rebookleason',args=[first_leasondate,leason["leason_id"]]),"class":"rebooking","start":leason_time_epoch,"end":leason_time_epoch})
+                   
                 #    
                 #
                 first_leasondate = first_leasondate + datetime.timedelta(days=7)
@@ -150,7 +156,12 @@ def list_rebookings():
 
     # End the function by returning data
     timez.append(time.time())
-    return dict(message=shit_list,blackdates=black_dates,leasons=leasons,timez=timez,rebookable_dates=rebookable_dates,customer_leasons=customer_leasons)
+
+
+    # Lets pretend that it was a success without knowing it really was.. for now
+    json_leasonz = json.dumps({"success":1,"result":json_leasons},sort_keys=True,indent=4, separators=(',', ': '))
+
+    return dict(message=shit_list,blackdates=black_dates,leasons=leasons,timez=timez,rebookable_dates=rebookable_dates,customer_leasons=customer_leasons,json_leasons=json_leasonz)
         
 def list_leasondates():
     '''
