@@ -97,11 +97,12 @@ def list_rebookings():
 
         # Get a lists of leasons for todays weekday, based on the customers skill_level
         q = (db.leason.week_day==weekday)&(db.leason.skill_level==db.skill_level.id)&(db.skill_level.skill_point <= skill_level)
-        rows = db(q).select(db.leason.id,db.leason.max_customers)
+        rows = db(q).select(db.leason.id,db.leason.max_customers,db.leason.leason_time)
         if len(rows) > 0:
             for row in rows:
                 max_customers = row["leason.max_customers"]
                 leason_id = row["leason.id"]
+                leason_time = row["leason_time"]
                 # For each leason, find out the active number of riders in this group
                 # Except if this leason is one that the customer already rides in, he can 
                 # not rebook in a leason he already rides in(how coudl you ride twice
@@ -112,7 +113,7 @@ def list_rebookings():
                     except:
                         #Assume it is 0
                         customers_in_leason = 0
-                    leasons.append({"weekday":weekday,"leason_id":leason_id,"customers_in_leason":customers_in_leason,"max_customers":max_customers})
+                    leasons.append({"weekday":weekday,"leason_id":leason_id,"customers_in_leason":customers_in_leason,"max_customers":max_customers,"leason_time":leason_time})
         iterweekday = iterweekday + 1
 
     #  leason_max_riders - customers_who_ride - rerides + cancellations = Available rebookable slots
@@ -126,10 +127,12 @@ def list_rebookings():
             today=datetime.date(year=datetime.datetime.now().year,month=datetime.datetime.now().month,day=datetime.datetime.now().day)
             # What is the first date for this weekday, counting from today?
             first_leasondate = get_firstdate_weekday(weekday, today)
-            # Now we have our starting point, and while loop through it until we hit the stop_date 
+            # Now we have our starting point, and will loop through it until we hit the stop_date 
             while first_leasondate <= stop_date:
                 # Check to make sure it is not in black dates 
                 if first_leasondate not in black_dates:
+                    # Prepare an EPOCH for the date and time of the leason
+                    leason_time=convert_dt_to_epoch(first_leasondate,leason["leason_time"])
                     # Now check to see if there are any cancelled leasons for this date and leason
                     cancelled_leasons = len(db((db.cancelled_leasons.cancelled_date == first_leasondate) & (db.cancelled_leasons.id_leason == leason["leason_id"])).select(db.cancelled_leasons.id))
 
@@ -138,17 +141,11 @@ def list_rebookings():
                     # Then do
                     available_rebooking_slots = leason["max_customers"] - rebooked_leasons + cancelled_leasons 
                     # Append
-                    rebookable_dates.append({"Leason ID":leason["leason_id"],"Date":first_leasondate,"slots":available_rebooking_slots,"cancelled_leasons":cancelled_leasons,"rebooked_leasons":rebooked_leasons})
+                    rebookable_dates.append({"Leason ID":leason["leason_id"],"Date":first_leasondate,"slots":available_rebooking_slots,"cancelled_leasons":cancelled_leasons,"rebooked_leasons":rebooked_leasons,"leason_time_epoch":leason_time,"leason_time":leason["leason_time"]})
                 #i#    
                 #    
                 #
                 first_leasondate = first_leasondate + datetime.timedelta(days=7)
-    else:
-        #oekr
-        arne = 1 + 2
-
-
-
 
 
     # End the function by returning data
