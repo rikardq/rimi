@@ -16,9 +16,10 @@ We should override the call so we can send a customer id etc.
 @auth.requires_login()
 def events():
   # Example on how the calenadar expects its JSON api. Note the "class" attribute we should change it to something like guiclass..
-    return {"success":"1", "result":[{"id":123, "title":"Hopping", "class":"event-important","url":"http://dn.se", "start":1379264400000, "end":1379304060000}]}
+    #return {"success":"1", "result":[{"id":123, "title":"Hopping", "class":"event-important","url":"http://dn.se", "start":1379264400000, "end":1379304060000}]}
+    return list_rebookings(1)
 
-def list_rebookings():
+def list_rebookings(customerid):
     # Watching execution time to try to catch resource hogs as I add them
     timez = []
     timez.append(time.time())
@@ -27,12 +28,12 @@ def list_rebookings():
     # The cust_id is the first argument in calling this function
     # But this is really bad. Uberbad. Do not do this. Query the database for the currently
     # logged in users user_id variable directly instead.
-    cust_id = request.args(0)
-
+    #cust_id = request.args(0)
+    cust_id = customerid
     #Aquire customers skill level
     # At the same time, generate a list of the customers leasons ID. this will be used later to 
     # exclude the customers own leasons, since they are not available for rebookings.
-    customer_leasons = [] 
+    customer_leasons = []
     try:
         # See if the customer has any leasons assigned
         res = db(db.leasons.id_customer==cust_id).select(db.leasons.id_leason)
@@ -77,7 +78,7 @@ def list_rebookings():
         max_rebook_days = int(q.variable_value)
     except:
         max_rebook_days = 31
-    
+
     # Now we can create the stop_date
     stop_date = today + datetime.timedelta(days=max_rebook_days)
 
@@ -87,7 +88,7 @@ def list_rebookings():
     # Create the list for storing shit in
     shit_list = []
     shit_list.append(skill_level)
-    
+
     #Loop through the weekdays, lookin in the tables for suitable leasons that could perhaps offer some
     # rerides.
     iterweekday = 0 # This represents monday, for our loop.
@@ -161,7 +162,7 @@ def list_rebookings():
     # Lets pretend that it was a success without knowing it really was.. for now
     json_leasonz = json.dumps({"success":1,"result":json_leasons},sort_keys=True,indent=4, separators=(',', ': '))
 
-    return dict(message=shit_list,blackdates=black_dates,leasons=leasons,timez=timez,rebookable_dates=rebookable_dates,customer_leasons=customer_leasons,json_leasons=json_leasonz)
+    return json_leasonz #dict(message=shit_list,blackdates=black_dates,leasons=leasons,timez=timez,rebookable_dates=rebookable_dates,customer_leasons=customer_leasons,json_leasons=json_leason#z)
         
 def list_leasondates():
     '''
