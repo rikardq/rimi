@@ -1,9 +1,11 @@
+from datetime import datetime
+from datetime import date
+from datetime import timedelta
+from time import mktime
 # coding: utf8
 #
 # Definition of some common functions used, for now, in customer.py controller.
 #
-import time
-import datetime
 
 # Used to translate results from datetime.weekday results(numeric) into what the 
 # table leason stores the weekdays as, Swedish string.
@@ -96,7 +98,7 @@ def get_firstdate_weekday(weekday,start_date):
 
     # Now we know how many days to add to start_date to get the next
     # available date that is a weekday
-    start_date = start_date + datetime.timedelta(days=days_to_add)
+    start_date = start_date + timedelta(days=days_to_add)
     return start_date
 
 # Used to convert a datetime.date object into an int representing
@@ -104,9 +106,9 @@ def get_firstdate_weekday(weekday,start_date):
 def convert_dt_to_epoch(dt,dtt):
     # Use the combine function to combine the datetime.date and the datetime.time
     # into a datetime.datetime object. 
-    dtdt = datetime.datetime.combine(dt,dtt)
+    dtdt = datetime.combine(dt,dtt)
     # Get epoch in seconds
-    secs = time.mktime(dtdt.timetuple()) + dtdt.microsecond/1000000.0
+    secs = mktime(dtdt.timetuple()) + dtdt.microsecond/1000000.0
     # Get epoch in millis, convert to int
     millis = int(secs * 1000)
     return millis
@@ -116,8 +118,8 @@ def convert_dt_to_epoch(dt,dtt):
 def check_canx_time(leason_id):
     leason_time = db(db.leason.id==leason_id).select(db.leason.leason_time)[0]["leason_time"]
     hours_before_canx = int(db(db.admin_settings.variable_name=="hours_before_canx").select()[0]["variable_value"])
-    last_call = datetime.datetime.today() + datetime.timedelta(hours=hours_before_canx)
-    leason = (datetime.datetime.combine(datetime.date.today(), leason_time))
+    last_call = datetime.today() + timedelta(hours=hours_before_canx)
+    leason = (datetime.combine(date.today(), leason_time))
     if last_call > leason:
         return False
     else:

@@ -1,4 +1,9 @@
 import json
+from datetime import datetime
+from datetime import date
+from datetime import timedelta
+from datetime import time as dttime
+from time import time
 # coding: utf8
 #
 # This is the controller for kund, or customer view. All administration that a end-customer can do with their leasons should reside here.
@@ -17,20 +22,20 @@ We should override the call so we can send a customer id etc.
 def events():
   # Example on how the calenadar expects its JSON api. Note the "class" attribute we should change it to something like guiclass..
     #return {"success":"1", "result":[{"id":123, "title":"Hopping", "class":"event-important","url":"http://dn.se", "start":1379264400000, "end":1379304060000}]}
-    #return list_rebookings(1)
-    return list_leasondates(1)
+    return list_rebookings(1)
+    #return list_leasondates(1)
 
-def list_rebookings():
+def list_rebookings(customerid):
     # Watching execution time to try to catch resource hogs as I add them
     timez = []
-    timez.append(time.time())
+    timez.append(time())
     ''' Define Function Here
     '''
     # The cust_id is the first argument in calling this function
     # But this is really bad. Uberbad. Do not do this. Query the database for the currently
     # logged in users user_id variable directly instead.
-    cust_id = request.args(0)
-    #cust_id = customerid
+    #cust_id = request.args(0)
+    cust_id = customerid
     #Aquire customers skill level
     # At the same time, generate a list of the customers leasons ID. this will be used later to 
     # exclude the customers own leasons, since they are not available for rebookings.
@@ -64,6 +69,7 @@ def list_rebookings():
         #Something did not work, set skill level to 0
         skill_level = 0
 
+
     # Lets get the active semester
     active_semester = retrieve_current_semester()
 
@@ -71,7 +77,7 @@ def list_rebookings():
     black_dates = get_black_dates(active_semester)
 
     # Todays date, in datetime.date format to stay consistent.
-    today=datetime.date(year=datetime.datetime.now().year,month=datetime.datetime.now().month,day=datetime.datetime.now().day)
+    today=date(year=datetime.now().year,month=datetime.now().month,day=datetime.now().day)
 
     # Attempt to get the max_rebook_days variable from the admin_settings table. IF it is not set, use the default of 31
     try:
@@ -81,14 +87,8 @@ def list_rebookings():
         max_rebook_days = 31
 
     # Now we can create the stop_date
-    stop_date = today + datetime.timedelta(days=max_rebook_days)
+    stop_date = today + timedelta(days=max_rebook_days)
 
-	# Just for debugging
-    timez.append(today)
-    timez.append(stop_date)
-    # Create the list for storing shit in
-    shit_list = []
-    shit_list.append(skill_level)
 
     #Loop through the weekdays, lookin in the tables for suitable leasons that could perhaps offer some
     # rerides.
@@ -101,6 +101,7 @@ def list_rebookings():
         # Get a lists of leasons for todays weekday, based on the customers skill_level
         q = (db.leason.week_day==weekday)&(db.leason.skill_level==db.skill_level.id)&(db.skill_level.skill_point <= skill_level)
         rows = db(q).select(db.leason.max_customers,db.leason.id,db.leason.leason_time,db.leason.week_day,db.leason.leason_time)
+
         if len(rows) > 0:
             for row in rows:
                 max_customers = row.max_customers 
@@ -131,7 +132,7 @@ def list_rebookings():
         for leason in leasons:
             # Translate the literal swedish weekday to a numeric one 
             weekday = reverse_translate_weekday(leason["weekday"])
-            today=datetime.date(year=datetime.datetime.now().year,month=datetime.datetime.now().month,day=datetime.datetime.now().day)
+            today=date(year=datetime.now().year,month=datetime.now().month,day=datetime.now().day)
             # What is the first date for this weekday, counting from today?
             first_leasondate = get_firstdate_weekday(weekday, today)
             # Now we have our starting point, and will loop through it until we hit the stop_date 
@@ -149,21 +150,22 @@ def list_rebookings():
                     available_rebooking_slots = leason["max_customers"] - rebooked_leasons + cancelled_leasons 
                     # Append
                     rebookable_dates.append({"Leason ID":leason["leason_id"],"Date":first_leasondate,"slots":available_rebooking_slots,"cancelled_leasons":cancelled_leasons,"rebooked_leasons":rebooked_leasons,"leason_time_epoch":leason_time_epoch,"leason_time":leason["leason_time"]})
-                    json_leasons.append({"id:":str(int(time.time()*1000000))[10:],"title":leason["week_day"] + " " + str(leason["leason_time"]),"url":URL('rebookleason',args=[first_leasondate,leason["leason_id"]]),"class":"rebooking","start":leason_time_epoch,"end":leason_time_epoch})
+                    json_leasons.append({"id:":str(int(time()*1000000))[10:],"title":leason["week_day"] + " " + str(leason["leason_time"]),"url":URL('rebookleason',args=[first_leasondate,leason["leason_id"]]),"class":"rebooking","start":leason_time_epoch,"end":leason_time_epoch})
                    
                 #    
                 #
-                first_leasondate = first_leasondate + datetime.timedelta(days=7)
+                first_leasondate = first_leasondate + timedelta(days=7)
 
 
     # End the function by returning data
-    timez.append(time.time())
+    timez.append(time())
 
 
     # Lets pretend that it was a success without knowing it really was.. for now
     json_leasonz = json.dumps({"success":1,"result":json_leasons},sort_keys=True,indent=4, separators=(',', ': '))
 
-    return json_leasonz #dict(message=shit_list,blackdates=black_dates,leasons=leasons,timez=timez,rebookable_dates=rebookable_dates,customer_leasons=customer_leasons,json_leasons=json_leason#z)
+    return json_leasonz
+    #return dict(message=timez,blackdates=black_dates,leasons=leasons,timez=timez,rebookable_dates=rebookable_dates,customer_leasons=customer_leasons,json_leasons=json_leasons)
 
 def list_leasondates(customer):
     '''
@@ -191,7 +193,7 @@ def list_leasondates(customer):
     end_date = semester_info.end_date
 
     # We also need ot know todays date, in datetime.date format to stay consistent.
-    today=datetime.date(year=datetime.datetime.now().year,month=datetime.datetime.now().month,day=datetime.datetime.now().day)
+    today=date(year=datetime.now().year,month=datetime.now().month,day=datetime.now().day)
 
     # Here we will hold all leason data that will eventually be returned as json
     master_leasons = []
@@ -229,20 +231,19 @@ def list_leasondates(customer):
             #The past consists of historical leasons and cancelled leasons(past). Beyond that, there is no past.
             while leason_start_date < today:
                 if leason_start_date in historical_leasons:
-                    leason_dates.append({"id":str(int(time.time()*1000000))[10:],"title":leason_data.week_day + " " + str(leason_data.leason_time), "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"class":"viewhistorical","start":convert_dt_to_epoch(leason_start_date,leason_data.leason_time),"end":convert_dt_to_epoch(leason_start_date,leason_data.leason_time)})
+                    leason_dates.append({"id":str(int(time()*1000000))[10:],"title":leason_data.week_day + " " + str(leason_data.leason_time), "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"class":"viewhistorical","start":convert_dt_to_epoch(leason_start_date,leason_data.leason_time),"end":convert_dt_to_epoch(leason_start_date,leason_data.leason_time)})
                 else:
                     if leason_start_date in canx_leasons:
-                        leason_dates.append({"id":str(int(time.time()*1000000))[10:],"title":leason_data.week_day + " " + str(leason_data.leason_time), "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"class":"viewhistorical","start":convert_dt_to_epoch(leason_start_date,leason_data.leason_time),"end":convert_dt_to_epoch(leason_start_date,leason_data.leason_time)})
+                        leason_dates.append({"id":str(int(time()*1000000))[10:],"title":leason_data.week_day + " " + str(leason_data.leason_time), "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"class":"viewhistorical","start":convert_dt_to_epoch(leason_start_date,leason_data.leason_time),"end":convert_dt_to_epoch(leason_start_date,leason_data.leason_time)})
                 # Adding another week to skipjump into the present(eventually)
-                leason_start_date = leason_start_date + datetime.timedelta(days=7)
+                leason_start_date = leason_start_date + timedelta(days=7)
 
             # The Present
             if leason_start_date == today:
                 # Do checks regarding today. I:E if there is a leason TODAY we must check the time. If it is 4 hours before leason
                 # starts they can cancel it. If it is less then that, they are screwed.
-                #leason_dates.append("Today Is Now: " + str(leason_start_date))
-                # Must add another week to the variable so the function can keep rolling with the FuTuRe
-                leason_start_date = leason_start_date + datetime.timedelta(days=7)
+                # Must add another week to the variable so the function can keep rolling towards da FuTuRe
+                leason_start_date = leason_start_date + timedelta(days=7)
 
             # THe Future
             # La Futura consists of future "blank" dates, and checkign to see if any are listed as black dates.
@@ -251,11 +252,11 @@ def list_leasondates(customer):
                 while leason_start_date <= end_date:
                     # We n
                     if leason_start_date in black_dates:
-                        leason_dates.append({"id":str(int(time.time()*1000000))[10:],"title":"Black Day", "url":"","class":"blackdate","start":convert_dt_to_epoch(leason_start_date,datetime.time()),"end":convert_dt_to_epoch(leason_start_date,datetime.time(23,59))})
-                        leason_start_date = leason_start_date + datetime.timedelta(days=7)
+                        leason_dates.append({"id":str(int(time()*1000000))[10:],"title":"Black Day", "url":"","class":"blackdate","start":convert_dt_to_epoch(leason_start_date,time()),"end":convert_dt_to_epoch(leason_start_date,dttime(23,59))})
+                        leason_start_date = leason_start_date + timedelta(days=7)
                     else:
-                        leason_dates.append({"id":str(int(time.time()*1000000))[10:],"title":leason_data.week_day + " " + str(leason_data.leason_time), "url":URL('viewfutureleasondetails',args=[leason_data.id,leason_start_date]),"class":"viewfuture","start":convert_dt_to_epoch(leason_start_date,leason_data.leason_time),"end":convert_dt_to_epoch(leason_start_date,leason_data.leason_time)})
-                        leason_start_date = leason_start_date + datetime.timedelta(days=7)
+                        leason_dates.append({"id":str(int(time()*1000000))[10:],"title":leason_data.week_day + " " + str(leason_data.leason_time), "url":URL('viewfutureleasondetails',args=[leason_data.id,leason_start_date]),"class":"viewfuture","start":convert_dt_to_epoch(leason_start_date,leason_data.leason_time),"end":convert_dt_to_epoch(leason_start_date,leason_data.leason_time)})
+                        leason_start_date = leason_start_date + timedelta(days=7)
 
             # Now add the list to the master leason list
             master_leasons.append(leason_dates)
@@ -265,7 +266,7 @@ def list_leasondates(customer):
 
 
     # Now we have one list for each leason in the master_leasons. We must pop this out and make 
-    # one list to rule them all
+    # one list to rule them all. 
     newmaster = []
     no_of_lists = len(master_leasons)
     startnum = 0
@@ -274,7 +275,5 @@ def list_leasondates(customer):
             newmaster.append(entry)
         startnum = startnum + 1
 
-    json_leasonz = json.dumps({"success":1,"result":master_leasons},sort_keys=True,indent=4, separators=(',', ': '))
     json_newmaster = json.dumps({"success":1,"result":newmaster},sort_keys=True,indent=4, separators=(',', ': '))
-    #return dict(message=json_leasonz,newmaster=json_newmaster)
     return json_newmaster
