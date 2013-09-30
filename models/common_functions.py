@@ -34,8 +34,8 @@ def reverse_translate_weekday(weekd):
 
 # Retrieve the currently selected semester
 def retrieve_current_semester():
-    active_semester = db(db.active_semester).select()[0]
-    return active_semester.id_semester
+    active_semester = db(db.admin_settings.variable_name=="active_semester").select()[0]
+    return active_semester.variable_value
 
 # This functions usage is questionable, and will be reworked
 def get_cancelled_leasons(cust_id,leason_id):
@@ -124,5 +124,3 @@ def check_canx_time(leason_id):
         return False
     else:
         return True
-
-    
