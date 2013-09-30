@@ -106,6 +106,8 @@ db.define_table("skill_level",
       SQLField("skill_point", "integer", requires=IS_IN_SET(range(1,50))),
       SQLField("skill_type", "string", requires=IS_IN_SET(["Ponny","Häst","Blandad"])))
 
+# The customer table. This will be replaced eventually with the builtin auth
+# table web2py uses.
 
 db.define_table("customer",
       SQLField("name", "string", notnull=True, default=None),
@@ -119,20 +121,15 @@ db.define_table("semester",
       SQLField("end_date", "date", notnull=True, default=None))
 
 
-#The purpose of this table is to contain one row, with the id of the currently activated semester.
-#******THIS SHOULD BE MIGRATED TO THE TABLE admin_settings!!!!******
-db.define_table("active_semester",
-      SQLField("id_semester", db.semester))
-
-#A leason is created in this table. It is tied to a semester and a skill level.
+#A leason is created in this table. It is tied to a skill level.
 db.define_table("leason",
-      SQLField("id_semester", db.semester),
       SQLField("week_day", requires=IS_IN_SET(['Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag','Söndag'])),
       SQLField("leason_time", "time", notnull=True, default=None),
+      SQLField("leason_length", "time", notnull=True, default=None),
       SQLField("max_customers", "integer", notnull=True, default=None),
       SQLField("skill_level", db.skill_level),
       SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'),
-      SQLField("leason_type", "string", requires=IS_IN_SET(['Ponny','Häst','Blandad']), default=None))
+      SQLField("leason_type", "string", requires=IS_IN_SET(['Ponny','Häst','Blandad'])))
 
 
 #The table that ties one customer to its leasons(one to many)
@@ -142,19 +139,26 @@ db.define_table("leasons",
 
 
 
-#Table definition
+# The history table which contains all historical leasons and their
+# attributes(since attributes of a leason are allowed to change
+# in the future, we keep the historical data here
 db.define_table("leasons_history",
       SQLField("id_customer", "integer", notnull=True, default=None),
       SQLField("id_leason", "integer", notnull=True, default=None),
       SQLField("id_semester", "integer", notnull=True, default=None),
-      SQLField("id_horse", "integer", notnull=True, default=None),
-      SQLField("id_rebooking", "integer", notnull=True, default=None),
+      SQLField("id_horse", "integer",  default=None),
+      SQLField("id_rebooking", "integer", default=None),
+      SQLField("leason_time", "time", notnull=True, default=None),
+      SQLField("leason_length", "time", notnull=True, default=None),
+      SQLField("skill_level", db.skill_level),
+      SQLField("leason_type", "string", default=None),
       SQLField("leason_date", "date", notnull=True, default=None))
 
 
 
 """
-Table definition
+Keeps track of any leasons that has been cancelled by the user or
+an instructor. Uncertain if db.leason.id should be contained here.
 """
 db.define_table("cancelled_leasons",
       SQLField("id_customer", db.customer),
@@ -164,12 +168,7 @@ db.define_table("cancelled_leasons",
 
 
 """
-The table rebooking is used for customers to request and be confirmed into rerides, or rebookings.
-When the customer requests an available rebooking slot it enters this table, with an approved 
-status of "notyet". That will display it in the instructors admin view, allowing the 
-instructor approve the rebooking request(approved slot to "yes") or deny it (approved
-slot to "no") and enter a deny_message informing the customer why they could not get
-the available leason.
+Keeps track of requested, denied and confirmed rebookings.
 """
 db.define_table("rebooking",
       SQLField("id_leason", db.leason),
@@ -180,7 +179,7 @@ db.define_table("rebooking",
 
 
 """
-Table definition
+Storing all horses associated with the business and their status.
 """
 db.define_table("horse",
       SQLField("name", "string", notnull=True, default=None),
@@ -188,7 +187,8 @@ db.define_table("horse",
       SQLField("horse_type", "string", requires=IS_IN_SET(['Ponny','Häst']), default=None))
 
 """
-Table definition
+We store any pre-selected horses in this table for display at appropriate
+views
 """
 db.define_table("reserved_horses",
       SQLField("id_customer", db.customer),
@@ -199,7 +199,7 @@ db.define_table("reserved_horses",
 
 
 """
-Table definition
+A black date is when the riding school is closed
 """
 db.define_table("black_dates",
       SQLField("id_semester", db.semester),
@@ -207,7 +207,6 @@ db.define_table("black_dates",
 
       
       
-db.leason.id_semester.requires=IS_IN_DB(db, 'semester.id')
 db.leasons.id_customer.requires=IS_IN_DB(db, 'customer.id')
 db.leasons.id_leason.requires=IS_IN_DB(db, 'leason.id')
 db.reserved_horses.id_customer.requires=IS_IN_DB(db, 'customer.id')
