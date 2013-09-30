@@ -40,6 +40,8 @@ def list_rebookings(customerid):
     # At the same time, generate a list of the customers leasons ID. this will be used later to 
     # exclude the customers own leasons, since they are not available for rebookings.
     customer_leasons = []
+    # Create a default variable skill_level
+    skill_level = 0
     try:
         # See if the customer has any leasons assigned
         res = db(db.leasons.id_customer==cust_id).select(db.leasons.id_leason)
@@ -59,15 +61,13 @@ def list_rebookings(customerid):
                 rows = db(q).select(db.skill_level.skill_point,orderby=~db.skill_level.skill_point)
                 if len(rows) > 0:
                     skill_level = int(rows[0]["skill_point"])
-                else:
-                    #Something did not work, set skill level to 0
-                    skill_level = 0
             except:
                 #Something did not work, set skill level to 0
                 skill_level = 0
     except:
         #Something did not work, set skill level to 0
         skill_level = 0
+
 
 
     # Lets get the active semester
@@ -242,6 +242,17 @@ def list_leasondates(customer):
             if leason_start_date == today:
                 # Do checks regarding today. I:E if there is a leason TODAY we must check the time. If it is 4 hours before leason
                 # starts they can cancel it. If it is less then that, they are screwed.
+                # function check_canx_time(leasonid) created ot check this, but it
+                # is not tested all the way yet
+                if check_canx_time(leason_data.id):
+                    # We have clearance to add this to a cancellable leason
+                    arne = 1
+                else: 
+                    # We have no clearance to cancel this leason. Display a class
+                    arne = 1
+                    # indicating a leason must be cancelled within X hours before
+                    # the start of the leason
+
                 # Must add another week to the variable so the function can keep rolling towards da FuTuRe
                 leason_start_date = leason_start_date + timedelta(days=7)
 
