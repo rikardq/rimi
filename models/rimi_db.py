@@ -94,10 +94,8 @@ db.define_table("leasons_history",
 
 
 
-"""
-Keeps track of any leasons that has been cancelled by the user or
-an instructor. Uncertain if db.leason.id should be contained here.
-"""
+#Keeps track of any leasons that has been cancelled by the user or
+#an instructor. Uncertain if db.leason.id should be contained here.
 db.define_table("cancelled_leasons",
       SQLField("id_customer", db.customer),
       SQLField("id_leason", db.leason),
@@ -105,9 +103,7 @@ db.define_table("cancelled_leasons",
       SQLField("when_cancelled", "datetime", notnull=True, default=None))
 
 
-"""
-Keeps track of requested, denied and confirmed rebookings.
-"""
+#Keeps track of requested, denied and confirmed rebookings.
 db.define_table("rebooking",
       SQLField("id_leason", db.leason),
       SQLField("id_customer", db.customer),
@@ -116,18 +112,14 @@ db.define_table("rebooking",
       SQLField("deny_message", "string"))
 
 
-"""
-Storing all horses associated with the business and their status.
-"""
+#Storing all horses associated with the business and their status.
 db.define_table("horse",
       SQLField("name", "string", notnull=True, default=None),
       SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'),
       SQLField("horse_type", "string", requires=IS_IN_SET(['Ponny','Häst']), default=None))
 
-"""
-We store any pre-selected horses in this table for display at appropriate
-views
-"""
+#We store any pre-selected horses in this table for display at appropriate
+#views
 db.define_table("reserved_horses",
       SQLField("id_customer", db.customer),
       SQLField("id_horse", db.horse),
@@ -136,23 +128,32 @@ db.define_table("reserved_horses",
 
 
 
-"""
-A black date is when the riding school is closed
-"""
+#A black date is when the riding school is closed
 db.define_table("black_dates",
       SQLField("id_semester", db.semester),
       SQLField("black_date", "date", notnull=True, default=None))
 
-      
-      
-db.leasons.id_customer.requires=IS_IN_DB(db, 'customer.id')
-db.leasons.id_leason.requires=IS_IN_DB(db, 'leason.id')
-db.reserved_horses.id_customer.requires=IS_IN_DB(db, 'customer.id')
-db.reserved_horses.id_horse.requires=IS_IN_DB(db, 'horse.id')
-db.reserved_horses.id_leason.requires=IS_IN_DB(db, 'leason.id')
-db.black_dates.id_semester.requires=IS_IN_DB(db, 'semester.id')
+# A table for storing our instructors in. This will most likely be migrated
+# to auth_user at a later point
+db.define_table("instructor",
+      SQLField("name", "string", notnull=True))
+
+# Define the one to many table for instructor(s) and leason
+db.define_table("owner_of_leason",
+      SQLField("leason_id", db.leason),
+      SQLField("instructor_id", db.instructor))
+
+db.owner_of_leason.instructor_id.requires=IS_IN_DB(db, "instructor.id", 'Instruktör: %(name)s')
+db.leasons.id_customer.requires=IS_IN_DB(db, "customer.id", 'Namn: %(name)s')
+db.leasons.id_leason.requires=IS_IN_DB(db, 'leason.id', '%(week_day)s %(leason_time)s')
+db.reserved_horses.id_customer.requires=IS_IN_DB(db, 'customer.id', '%(name)s')
+db.reserved_horses.id_horse.requires=IS_IN_DB(db, 'horse.id', '%(name)s')
+db.reserved_horses.id_leason.requires=IS_IN_DB(db, 'leason.id', '%(week_day)s %(leason_time)s')
+db.black_dates.id_semester.requires=IS_IN_DB(db, 'semester.id', '%(name)s')
 db.cancelled_leasons.id_customer.requires=IS_IN_DB(db, 'customer.id')
 db.cancelled_leasons.id_leason.requires=IS_IN_DB(db, 'leason.id')
 db.rebooking.id_leason.requires=IS_IN_DB(db, 'leason.id')
 db.rebooking.id_customer.requires=IS_IN_DB(db, 'customer.id')
-db.leason.skill_level.requires=IS_IN_DB(db, 'skill_level.id')
+db.leason.skill_level.requires=IS_IN_DB(db, 'skill_level.id', '%(skill_name)s')
+db.owner_of_leason.leason_id.requires=IS_IN_DB(db, "leason.id", '%(week_day)s %(leason_time)s')
+db.owner_of_leason.instructor_id.requires=IS_IN_DB(db, "instructor.id", 'Instruktör: %(name)s')
