@@ -1,6 +1,7 @@
 syntax: glob
 cache/**
 errors/**
+databases/**
 sessions/**
 *˜
 *.pyc
