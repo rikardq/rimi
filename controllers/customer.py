@@ -1,10 +1,10 @@
+# coding: utf8
 import json
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
 from datetime import time as dttime
 from time import time
-# coding: utf8
 #
 # This is the controller for kund, or customer view. All administration that a end-customer can do with their leasons should reside here.
 #
