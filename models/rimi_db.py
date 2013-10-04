@@ -40,34 +40,36 @@ db.define_table("admin_settings",
 # At skill_point of 0 for a leason, any customer can book it.
 
 db.define_table("skill_level",
-      SQLField("skill_name", "string", notnull=True, default=None),
-      SQLField("skill_point", "integer", requires=IS_IN_SET(range(1,50))),
-      SQLField("skill_type", "string", requires=IS_IN_SET(["Ponny","Häst","Blandad"])))
+      SQLField("skill_name", "string", label="Namn", notnull=True, default=None),
+      SQLField("skill_point", "integer", requires=IS_IN_SET(range(1,50)), label="Poäng"),
+      SQLField("skill_type", "string", requires=IS_IN_SET(["Ponny","Häst","Blandad"]), label="Typ"))
 
 # The customer table. This will be replaced eventually with the builtin auth
 # table web2py uses.
 
 db.define_table("customer",
-      SQLField("name", "string", notnull=True, default=None),
-      SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'))
+      SQLField("name", "string", label="Namn", notnull=True, default=None),
+      SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'),
+      format="%(name)s")
 
 
 #Here we define semesters
 db.define_table("semester",
-      SQLField("name", "string", notnull=True, default=None),
-      SQLField("start_date", "date", notnull=True, default=None),
-      SQLField("end_date", "date", notnull=True, default=None))
+      SQLField("name", "string", label="Termin", notnull=True, default=None),
+      SQLField("start_date", "date", label="När börjar terminen?", notnull=True, default=None),
+      SQLField("end_date", "date", label="När slutar terminen?", notnull=True, default=None),
+      format="%(name)s")
 
 
 #A leason is created in this table. It is tied to a skill level.
 db.define_table("leason",
-      SQLField("week_day", requires=IS_IN_SET(['Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag','Söndag'])),
-      SQLField("leason_time", "time", notnull=True, default=None),
-      SQLField("leason_length", "integer", notnull=True, default=None),
-      SQLField("max_customers", "integer", notnull=True, default=None),
-      SQLField("skill_level", db.skill_level),
-      SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'),
-      SQLField("leason_type", "string", requires=IS_IN_SET(['Ponny','Häst','Blandad'])))
+      SQLField("week_day", requires=IS_IN_SET(['Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag','Söndag']), label="Veckodag" ),
+      SQLField("leason_time", "time", label="Tid när lektionen börjar", notnull=True, default=None),
+      SQLField("leason_length", "integer", label="Längd på lektion, i minuter", notnull=True, default=None),
+      SQLField("max_customers", "integer", label="Max antal ryttare i gruppen", notnull=True, default=None),
+      SQLField("skill_level", db.skill_level, label="Välj nivå på gruppen"),
+      SQLField("status", "string", requires=IS_IN_SET(['Aktiv','Inaktiv']), default='Aktiv'),
+      SQLField("leason_type", "string", label="Lektionstyp", requires=IS_IN_SET(['Ponny','Häst','Blandad'])))
 
 
 #The table that ties one customer to its leasons(one to many)
@@ -114,9 +116,9 @@ db.define_table("rebooking",
 
 #Storing all horses associated with the business and their status.
 db.define_table("horse",
-      SQLField("name", "string", notnull=True, default=None),
-      SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'),
-      SQLField("horse_type", "string", requires=IS_IN_SET(['Ponny','Häst']), default=None))
+      SQLField("name", "string", label="Namn", notnull=True, default=None),
+      SQLField("status", "string", requires=IS_IN_SET(['Aktiv','Inaktiv']), default='Inaktiv'),
+      SQLField("horse_type", "string", label="Typ av häst", requires=IS_IN_SET(['Ponny','Häst']), default=None))
 
 #We store any pre-selected horses in this table for display at appropriate
 #views
@@ -130,13 +132,13 @@ db.define_table("reserved_horses",
 
 #A black date is when the riding school is closed
 db.define_table("black_dates",
-      SQLField("id_semester", db.semester),
-      SQLField("black_date", "date", notnull=True, default=None))
+      SQLField("id_semester", db.semester, label="Termin"),
+      SQLField("black_date", "date", label="Datum", notnull=True, default=None))
 
 # A table for storing our instructors in. This will most likely be migrated
 # to auth_user at a later point
 db.define_table("instructor",
-      SQLField("name", "string", notnull=True))
+      SQLField("name", "string", label="Namn", notnull=True))
 
 # Define the one to many table for instructor(s) and leason
 db.define_table("owner_of_leason",
