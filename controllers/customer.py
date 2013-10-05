@@ -9,7 +9,7 @@ from time import time
 # This is the controller for kund, or customer view. All administration that a end-customer can do with their leasons should reside here.
 #
 #
-@auth.requires_login()
+#@auth.requires_login()
 def index():
     message = "There is nothing here.... ALBATROSS!"
     return dict(message=message)
@@ -18,7 +18,7 @@ def index():
 The events is where the calendar widget retrives its events from.
 We should override the call so we can send a customer id etc.
 """
-@auth.requires_login()
+#@auth.requires_login()
 def events():
   # Example on how the calenadar expects its JSON api. Note the "class" attribute we should change it to something like guiclass..
     #return {"success":"1", "result":[{"id":123, "title":"Hopping", "class":"event-important","url":"http://dn.se", "start":1379264400000, "end":1379304060000}]}

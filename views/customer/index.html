@@ -2,17 +2,17 @@
 <h1>This is the customerCalendar.html template</h1>
 <b>In laddad kalender för en-GB språk, fel på rad 542 i calender.js tooltip fanns ej :/</b>
 
-<div id="calendar"></div>
+<div class="container" id="calendar">
+    <div class="row">
+        <div id="eventCalendarDefault"></div>
+        <script>
+            $(document).ready(function() {
+                $("#eventCalendarDefault").eventCalendar({
+                    eventsjson: 'rimi/customer/events.json' // link to events json
+                });
+            });
+        </script>
+    </div>
+</div>
 
-    <script type="text/javascript">
-        console.log("Init calendar");
-        var cal = $('#calendar');
-        var options =  {
-                        tmpl_path: "/rimi/static/calendar-templates/",
-                        language:"en-GB",
-                        view: 'year',
-                        events_url:'/rimi/customer/events.json'
-                        };
-        cal.calendar(options);
-    </script>
 {{=BEAUTIFY(response._vars)}}
