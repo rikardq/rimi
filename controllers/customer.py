@@ -151,6 +151,10 @@ def list_rebookings(customerid):
                 #    
                 #
                 first_leasondate = first_leasondate + timedelta(days=7)
+            # Now we add in all black dates, so they will display in the calendar. This is
+            # regardless if the customer can ride, or rebook - all black days are displayed.
+    for black_date in black_dates:
+        json_leasons.append({"title":"Ridskolan Stängd","url":"","type":"blackdate","date":str(convert_dt_to_epoch(black_date,dttime(12,0))),"description":"Ridskolan är stängd denna dag"})
     if len(json_leasons) < 1:
         json_leasons.append({"title":"empty","url":"empty","type":"empty","date":0,"description":"AAA"})
 
@@ -251,18 +255,20 @@ def list_leasondates(customer):
             if leason_start_date > today:
                 # Loop until we are at the end of the semester.
                 while leason_start_date <= end_date:
-                    # We n
-                    if leason_start_date in black_dates:
-                        leason_dates.append({"description":"ASS","title":"Black Day", "url":"","type":"blackdate","date":str(convert_dt_to_epoch(leason_start_date,time()))})
-                        leason_start_date = leason_start_date + timedelta(days=7)
-                    else:
+                    # We check to make sure it is not in black_dates 
+                    if leason_start_date not in black_dates:
                         leason_dates.append({"description":"ASSSS","title":str(leason_data.leason_time), "url":URL('viewfutureleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewfuture","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
-                        leason_start_date = leason_start_date + timedelta(days=7)
+
+                    leason_start_date = leason_start_date + timedelta(days=7)
 
             # Now add the list to the master leason list
             master_leasons.append(leason_dates)
     except:
         errormessage = "Unable to select customer leasons!"
+
+    # Add all black dates
+    for black_date in black_dates:
+        leason_dates.append({"title":"Ridskolan Stängd","url":"","type":"blackdate","date":str(convert_dt_to_epoch(black_date,dttime(12,0))),"description":"Ridskolan är stängd denna dag"})
 
 
 
