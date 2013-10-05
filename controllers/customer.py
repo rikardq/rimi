@@ -14,15 +14,19 @@ def index():
     message = "There is nothing here.... ALBATROSS!"
     return dict(message=message)
 
+def rebook():
+    message = "Rebooking calendar is displayed here!"
+    return dict(message=message)
+
 """
 The events is where the calendar widget retrives its events from.
 We should override the call so we can send a customer id etc.
 """
 #@auth.requires_login()
-def rebooking_events():
+def rebookdates():
     return list_rebookings(1)
 
-def events():
+def leasondates():
     return list_leasondates(1)
 
 def list_rebookings(customerid):
@@ -143,14 +147,14 @@ def list_rebookings(customerid):
                     # Then do
                     available_rebooking_slots = leason["max_customers"] - rebooked_leasons + cancelled_leasons 
                     # Append
-                    json_leasons.append({"title":leason["week_day"] + " " + str(leason["leason_time"]),"url":URL('rebookleason',args=[first_leasondate,leason["leason_id"]]),"type":"rebooking","date":leason_time_epoch})
-                   
+                    json_leasons.append({"title":str(leason["leason_time"]),"url":URL('rebookleason',args=[first_leasondate,leason["leason_id"]]),"type":"rebooking","date":str(leason_time_epoch),"description":"HAHHA"})
                 #    
                 #
                 first_leasondate = first_leasondate + timedelta(days=7)
     if len(json_leasons) < 1:
-        json_leasons.append({"title":"empty","url":"empty","type":"empty","date":0})
+        json_leasons.append({"title":"empty","url":"empty","type":"empty","date":0,"description":"AAA"})
 
+    json_leasons = json.dumps(json_leasons)
     return str(json_leasons)
 
 def list_leasondates(customer):

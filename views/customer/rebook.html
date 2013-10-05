@@ -1,6 +1,6 @@
 {{extend 'layout.html'}}
 <h1>Here is your lessons {NAME}</h1>
-<b>rebook calendar is <a href="rebook.html">here</a></b>
+<b><a href="index.html"> TILLBAKS</a></b>
 
 <div class="container" id="calendar">
     <div class="row">
@@ -9,7 +9,7 @@
             $(document).ready(function() {
                 $("#eventCalendarDefault").eventCalendar({
                     eventsLimit: 400,
-                    eventsjson: 'leasondates.json' // link to events json
+                    eventsjson: 'rebookdates.json' // link to events json
                 });
             });
         </script>
