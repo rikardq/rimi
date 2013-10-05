@@ -8,8 +8,12 @@
         <script>
             $(document).ready(function() {
                 $("#eventCalendarDefault").eventCalendar({
-                    eventsLimit: 400,
-                    eventsjson: 'leasondates.json' // link to events json
+                    txt_NextEvents: 'Next events showing up to four.',
+                    eventsLimit: 4,
+                    eventsScrollable: true,
+                    cacheJson: false,
+                    showDescription: true,
+                    eventsjson: 'leasondates.json'
                 });
             });
         </script>
