@@ -217,10 +217,10 @@ def list_leasondates(customer):
             #The past consists of historical leasons and cancelled leasons(past). Beyond that, there is no past.
             while leason_start_date < today:
                 if leason_start_date in historical_leasons:
-                    leason_dates.append({"description":"ASS","title":str(leason_data.leason_time), "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewhistorical","date":convert_dt_to_epoch(leason_start_date,leason_data.leason_time)})
+                    leason_dates.append({"description":"ASS","title":str(leason_data.leason_time), "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewhistorical","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
                 else:
                     if leason_start_date in canx_leasons:
-                        leason_dates.append({"description":"ASS","title":str(leason_data.leason_time), "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewhistorical","date":convert_dt_to_epoch(leason_start_date,leason_data.leason_time)})
+                        leason_dates.append({"description":"ASS","title":str(leason_data.leason_time), "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewhistorical","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
                 # Adding another week to skipjump into the present(eventually)
                 leason_start_date = leason_start_date + timedelta(days=7)
 
@@ -249,10 +249,10 @@ def list_leasondates(customer):
                 while leason_start_date <= end_date:
                     # We n
                     if leason_start_date in black_dates:
-                        leason_dates.append({"description":"ASS","title":"Black Day", "url":"","type":"blackdate","date":convert_dt_to_epoch(leason_start_date,time())})
+                        leason_dates.append({"description":"ASS","title":"Black Day", "url":"","type":"blackdate","date":str(convert_dt_to_epoch(leason_start_date,time()))})
                         leason_start_date = leason_start_date + timedelta(days=7)
                     else:
-                        leason_dates.append({"description":"ASSSS","title":str(leason_data.leason_time), "url":URL('viewfutureleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewfuture","date":convert_dt_to_epoch(leason_start_date,leason_data.leason_time)})
+                        leason_dates.append({"description":"ASSSS","title":str(leason_data.leason_time), "url":URL('viewfutureleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewfuture","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
                         leason_start_date = leason_start_date + timedelta(days=7)
 
             # Now add the list to the master leason list
@@ -273,7 +273,7 @@ def list_leasondates(customer):
         startnum = startnum + 1
 
     if len(newmaster) < 1:
-        newmaster.append({"description":"ASSA","title":"empty","url":"empty","type":"empty","date":0})
+        newmaster.append({"description":"ASSA","title":"empty","url":"empty","type":"empty","date":"1381766400000"})
 
     #json_newmaster = json.dumps({"success":1,"result":newmaster},sort_keys=True,indent=4, separators=(',', ': '))
     #return json_newmaster
