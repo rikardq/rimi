@@ -1,6 +1,6 @@
 {{extend 'layout.html'}}
-<h1>This is the customerCalendar.html template</h1>
-<b>In laddad kalender för en-GB språk, fel på rad 542 i calender.js tooltip fanns ej :/</b>
+<h1>Here is your lessons {NAME}</h1>
+<b>rebook or do other stuff .. .</b>
 
 <div class="container" id="calendar">
     <div class="row">
@@ -8,7 +8,7 @@
         <script>
             $(document).ready(function() {
                 $("#eventCalendarDefault").eventCalendar({
-                    eventsjson: 'rimi/customer/events.json' // link to events json
+                    eventsjson: 'customer/events.json' // link to events json
                 });
             });
         </script>
