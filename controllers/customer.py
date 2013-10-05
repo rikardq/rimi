@@ -22,7 +22,7 @@ We should override the call so we can send a customer id etc.
 def rebooking_events():
     return list_rebookings(1)
 
-def leasondates_events():
+def events():
     return list_leasondates(1)
 
 def list_rebookings(customerid):
