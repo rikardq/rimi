@@ -57,6 +57,16 @@ def get_leason_history(cust_id,leason_id):
             xleasons.append(entry["leason_date"])
     return xleasons
 
+# This functions usage is questionable, and will be reworked
+def get_rebooked_leasons(cust_id):
+    xleasons = []
+    q=(db.rebooking.id_customer==cust_id)
+    s=db(q).select(db.rebooking.leason_date)
+    if len(s) > 0:
+        for entry in s:
+            xleasons.append(entry["leason_date"])
+    return xleasons
+
 # Gather all black dates from the active semester and return them as a list 
 def get_black_dates(active_semester):
     xleasons = []
@@ -66,7 +76,6 @@ def get_black_dates(active_semester):
         for entry in s:
             xleasons.append(entry["black_date"])
     return xleasons
-
 
 # A function to retrieve a date for the first weekday entry from start_date 
 # i.e if it is september 3rd, a tuesday today and our weekday is thursday

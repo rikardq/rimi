@@ -147,7 +147,7 @@ def list_rebookings(customerid):
                     # Then do
                     available_rebooking_slots = leason["max_customers"] - rebooked_leasons + cancelled_leasons 
                     # Append
-                    json_leasons.append({"title":str(leason["leason_time"]),"url":URL('rebookleason',args=[first_leasondate,leason["leason_id"]]),"type":"rebooking","date":str(leason_time_epoch),"description":"HAHHA"})
+                    json_leasons.append({"title":str(leason["leason_time"]) + " " + str(leason["week_day"]),"url":URL('rebookleason',args=[first_leasondate,leason["leason_id"]]),"type":"rebooking","date":str(leason_time_epoch),"description":"HAHHA"})
                 #    
                 #
                 first_leasondate = first_leasondate + timedelta(days=7)
@@ -213,11 +213,11 @@ def list_leasondates(customer):
             #This is a list for keeping the dates for this leason
             leason_dates = []
 
-            # Lets retrieve a list of cancelled leasons,
-            #and one of leasons in history pertaining to this leason and customer.
-            # We will use these lists to search through when we loop, so we do not hit the database a trillion times.
+            #
+            # We will use these lists to search through when we loop
             canx_leasons = get_cancelled_leasons(cust_id,leason_id)
             historical_leasons = get_leason_history(cust_id,leason_id)
+            rebooked_leasons = get_rebooked_leasons(cust_id)
 
             # The Past, The Present and The Future
 
@@ -225,10 +225,10 @@ def list_leasondates(customer):
             #The past consists of historical leasons and cancelled leasons(past). Beyond that, there is no past.
             while leason_start_date < today:
                 if leason_start_date in historical_leasons:
-                    leason_dates.append({"description":"ASS","title":str(leason_data.leason_time), "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewhistorical","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
+                    leason_dates.append({"description":"","title":"Du red kl. " + str(leason_data.leason_time), "url":"","type":"viewhistorical","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
                 else:
                     if leason_start_date in canx_leasons:
-                        leason_dates.append({"description":"ASS","title":str(leason_data.leason_time), "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewhistorical","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
+                        leason_dates.append({"description":"Din lektion är avbokad.","title":str(leason_data.leason_time) + " " + leason_data.week_day + " avbokad.", "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewhistorical","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
                 # Adding another week to skipjump into the present(eventually)
                 leason_start_date = leason_start_date + timedelta(days=7)
 
@@ -251,13 +251,16 @@ def list_leasondates(customer):
                 leason_start_date = leason_start_date + timedelta(days=7)
 
             # THe Future
-            # La Futura consists of future "blank" dates, and checkign to see if any are listed as black dates.
+            # La Futura consists of future "blank" dates, future rebookings and future cancelled leasons 
             if leason_start_date > today:
                 # Loop until we are at the end of the semester.
                 while leason_start_date <= end_date:
                     # We check to make sure it is not in black_dates 
                     if leason_start_date not in black_dates:
-                        leason_dates.append({"description":"ASSSS","title":str(leason_data.leason_time), "url":URL('viewfutureleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewfuture","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
+                        if leason_start_date in canx_leasons:
+                            leason_dates.append({"description":"Din lektion är avbokad.","title":str(leason_data.leason_time) + " " + leason_data.week_day + " avbokad.", "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewhistorical","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
+                        else:
+                            leason_dates.append({"description":"Reguljär lektion.","title":str(leason_data.leason_time) + " " + leason_data.week_day, "url":URL('viewfutureleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewfuture","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
 
                     leason_start_date = leason_start_date + timedelta(days=7)
 
@@ -269,6 +272,10 @@ def list_leasondates(customer):
     # Add all black dates
     for black_date in black_dates:
         leason_dates.append({"title":"Ridskolan Stängd","url":"","type":"blackdate","date":str(convert_dt_to_epoch(black_date,dttime(12,0))),"description":"Ridskolan är stängd denna dag"})
+
+    # Add all rebooked dates
+    for rebooked_leason in rebooked_leasons: 
+        leason_dates.append({"title":"Igenridning","url":"","type":"rebooking","date":str(convert_dt_to_epoch(rebooked_leason,dttime(12,0))),"description":"Du har bokat en igenridning"})
 
 
 
