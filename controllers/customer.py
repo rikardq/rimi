@@ -24,9 +24,11 @@ We should override the call so we can send a customer id etc.
 """
 #@auth.requires_login()
 def rebookdates():
+    # This function returns the json values. The calendar calls this function
     return list_rebookings(1)
 
 def leasondates():
+    # This function returns the json values. The calendar calls this function
     return list_leasondates(1)
 
 def list_rebookings(customerid):
@@ -147,7 +149,10 @@ def list_rebookings(customerid):
                     # Then do
                     available_rebooking_slots = leason["max_customers"] - rebooked_leasons + cancelled_leasons 
                     # Append
-                    json_leasons.append({"title":str(leason["leason_time"]) + " " + str(leason["week_day"]),"url":URL('rebookleason',args=[first_leasondate,leason["leason_id"]]),"type":"rebooking","date":str(leason_time_epoch),"description":"HAHHA"})
+                    if len(db((db.rebooking.id_leason == leason["leason_id"]) & (db.rebooking.id_customer == cust_id) & (db.rebooking.leason_date == first_leasondate)).select()) == 1:
+                        json_leasons.append({"title":str(leason["leason_time"]) + " " + str(leason["week_day"]),"url":"","type":"rebooking","date":str(leason_time_epoch),"description":"Du har redan bokat en igenridning på den här lektionen."})
+                    else:
+                        json_leasons.append({"title":str(leason["leason_time"]) + " " + str(leason["week_day"]),"url":URL('book_rebooking.html', args=[cust_id, leason["leason_id"], first_leasondate]),"type":"rebooking","date":str(leason_time_epoch),"description":"HAHHA"})
                 #    
                 #
                 first_leasondate = first_leasondate + timedelta(days=7)
@@ -296,3 +301,18 @@ def list_leasondates(customer):
     #return json_newmaster
     newmaster = json.dumps(newmaster)
     return str(newmaster)
+
+
+def book_rebooking():
+    # The function to book a rebooking. This URL is created in the list_rebookings function. The user id is for now 
+    # passed here as a request.args but should obviously be migrated into the greater auth scheme
+    cust_id = request.args(0)
+    leason_id = request.args(1)
+    leason_date = request.args(2)
+    
+    form = FORM.confirm("Är du säker på att du vill boka denna igenridning?")
+    if form.accepted:
+        if db.rebooking.validate_and_insert(id_leason=leason_id, id_customer=cust_id, leason_date=leason_date):
+            redirect(URL('rebook.html'))
+    return dict(form=form)
+

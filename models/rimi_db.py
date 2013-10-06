@@ -83,16 +83,16 @@ db.define_table("leasons",
 # attributes(since attributes of a leason are allowed to change
 # in the future, we keep the historical data here
 db.define_table("leasons_history",
-      SQLField("id_customer", "integer", notnull=True, default=None),
-      SQLField("id_leason", "integer", notnull=True, default=None),
-      SQLField("id_semester", "integer", notnull=True, default=None),
+      SQLField("id_customer", "integer", notnull=True),
+      SQLField("id_leason", "integer", notnull=True),
+      SQLField("id_semester", "integer", notnull=True),
       SQLField("id_horse", "integer",  default=None),
       SQLField("id_rebooking", "integer", default=None),
-      SQLField("leason_time", "time", notnull=True, default=None),
-      SQLField("leason_length", "time", notnull=True, default=None),
+      SQLField("leason_time", "time", default=None),
+      SQLField("leason_length", "integer", notnull=True),
       SQLField("skill_level", db.skill_level),
       SQLField("leason_type", "string", default=None),
-      SQLField("leason_date", "date", notnull=True, default=None))
+      SQLField("leason_date", "date", notnull=True))
 
 
 
