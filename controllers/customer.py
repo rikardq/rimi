@@ -11,8 +11,9 @@ from time import time
 #
 #@auth.requires_login()
 def index():
-    message = "There is nothing here.... ALBATROSS!"
-    return dict(message=message)
+    cust_id = 1
+    helper = "Denna kalender visar dom lektionerna du rider. Du kan även se avbokade lektioner och dina igenridningar. För att boka av en lektion så väljer du det datum och lektion som du vill avboka, och tryck sedan Avboka lektion."
+    return dict(helper=helper,cust_id=cust_id)
 
 def rebook():
     message = "Rebooking calendar is displayed here!"
@@ -150,16 +151,33 @@ def list_rebookings(customerid):
                     available_rebooking_slots = leason["max_customers"] - rebooked_leasons + cancelled_leasons 
                     # Append
                     if len(db((db.rebooking.id_leason == leason["leason_id"]) & (db.rebooking.id_customer == cust_id) & (db.rebooking.leason_date == first_leasondate)).select()) == 1:
-                        json_leasons.append({"title":str(leason["leason_time"]) + " " + str(leason["week_day"]),"url":"","type":"rebooking","date":str(leason_time_epoch),"description":"Du har redan bokat en igenridning på den här lektionen."})
+                        json_leasons.append({
+                        "title":"Bokad igenridning",
+                        "url":"",
+                        "type":"rebooking",
+                        "date":str(leason_time_epoch),
+                        "description":"Du är inbokad på en igenridning. Status:?"  
+                        })
                     else:
-                        json_leasons.append({"title":str(leason["leason_time"]) + " " + str(leason["week_day"]),"url":URL('book_rebooking.html', args=[cust_id, leason["leason_id"], first_leasondate]),"type":"rebooking","date":str(leason_time_epoch),"description":"HAHHA"})
+                        json_leasons.append({
+                        "title":"Boka en igenridning",
+                        "url":URL('book_rebooking.html', args=[cust_id, leason["leason_id"], first_leasondate]),
+                        "type":"rebooking",
+                        "date":str(leason_time_epoch),
+                        "description":""})
                 #    
                 #
                 first_leasondate = first_leasondate + timedelta(days=7)
             # Now we add in all black dates, so they will display in the calendar. This is
             # regardless if the customer can ride, or rebook - all black days are displayed.
     for black_date in black_dates:
-        json_leasons.append({"title":"Ridskolan Stängd","url":"","type":"blackdate","date":str(convert_dt_to_epoch(black_date,dttime(12,0))),"description":"Ridskolan är stängd denna dag"})
+        json_leasons.append({
+        "title":"Ridskolan Stängd",
+        "url":"",
+        "type":"blackdate",
+        "date":str(convert_dt_to_epoch(black_date,dttime(12,0))),
+        "description":"Ridskolan är stängd denna dag"
+        })
     if len(json_leasons) < 1:
         json_leasons.append({"title":"empty","url":"empty","type":"empty","date":0,"description":"AAA"})
 
@@ -230,10 +248,22 @@ def list_leasondates(customer):
             #The past consists of historical leasons and cancelled leasons(past). Beyond that, there is no past.
             while leason_start_date < today:
                 if leason_start_date in historical_leasons:
-                    leason_dates.append({"description":"","title":"Du red kl. " + str(leason_data.leason_time), "url":"","type":"viewhistorical","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
+                    leason_dates.append({
+                    "description":"",
+                    "title":"Du red kl. " + str(leason_data.leason_time), 
+                    "url":"",
+                    "type":"viewhistorical",
+                    "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
+                    })
                 else:
                     if leason_start_date in canx_leasons:
-                        leason_dates.append({"description":"Din lektion är avbokad.","title":str(leason_data.leason_time) + " " + leason_data.week_day + " avbokad.", "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewhistorical","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
+                        leason_dates.append({
+                        "description":"Din lektion är avbokad.",
+                        "title":"Avbokad",
+                        "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),
+                        "type":"viewhistorical",
+                        "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
+                        })
                 # Adding another week to skipjump into the present(eventually)
                 leason_start_date = leason_start_date + timedelta(days=7)
 
@@ -245,12 +275,24 @@ def list_leasondates(customer):
                 # is not tested all the way yet
                 if check_canx_time(leason_data.id):
                     # We have clearance to add this to a cancellable leason
-                    arne = 1
+                    leason_dates.append({
+                    "description":"",
+                    "title":"Avboka denna lektion",
+                    "url":URL('cancel_leason.html', args=[cust_id, leason["leason_id"], leason_start_date]),
+                    "type":"viewfuture",
+                    "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
+                    })
                 else: 
                     # We have no clearance to cancel this leason. Display a class
-                    arne = 1
                     # indicating a leason must be cancelled within X hours before
                     # the start of the leason
+                    leason_dates.append({
+                    "title":"En lektion måste avbokas minst 4 timmar innan lektionen börjar.",
+                    "description":"",
+                    "url":"",
+                    "type":"lastcall",
+                    "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
+                    })
 
                 # Must add another week to the variable so the function can keep rolling towards da FuTuRe
                 leason_start_date = leason_start_date + timedelta(days=7)
@@ -263,9 +305,19 @@ def list_leasondates(customer):
                     # We check to make sure it is not in black_dates 
                     if leason_start_date not in black_dates:
                         if leason_start_date in canx_leasons:
-                            leason_dates.append({"description":"Din lektion är avbokad.","title":str(leason_data.leason_time) + " " + leason_data.week_day + " avbokad.", "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewhistorical","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
+                            leason_dates.append({
+                            "description":"",
+                            "title":"Avbokad",
+                            "url":"",
+                            "type":"viewfuture",
+                            "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
                         else:
-                            leason_dates.append({"description":"Reguljär lektion.","title":str(leason_data.leason_time) + " " + leason_data.week_day, "url":URL('viewfutureleasondetails',args=[leason_data.id,leason_start_date]),"type":"viewfuture","date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
+                            leason_dates.append({
+                            "description":"",
+                            "title":"Avboka denna lektion",
+                            "url":URL('cancel_leason.html', args=[cust_id, leason_data.id, leason_start_date]),
+                            "type":"viewfuture",
+                            "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
 
                     leason_start_date = leason_start_date + timedelta(days=7)
 
@@ -280,7 +332,13 @@ def list_leasondates(customer):
 
     # Add all rebooked dates
     for rebooked_leason in rebooked_leasons: 
-        leason_dates.append({"title":"Igenridning","url":"","type":"rebooking","date":str(convert_dt_to_epoch(rebooked_leason,dttime(12,0))),"description":"Du har bokat en igenridning"})
+        # Get the time of the leason that was rebooked...
+        rb_ltime = db.leason[rebooked_leason["leason_id"]]["leason_time"]
+        leason_dates.append({
+        "title":"Igenridning",
+        "url":"",
+        "type":"rebooking",
+        "date":str(convert_dt_to_epoch(rebooked_leason["leason_date"],rb_ltime)),"description":"Du har bokat en igenridning"})
 
 
 
@@ -309,10 +367,29 @@ def book_rebooking():
     cust_id = request.args(0)
     leason_id = request.args(1)
     leason_date = request.args(2)
+
+    helper = "När du har bokat en igenridning så är din kredit förbrukad. En bokad igenridning går inte att boka om, eller avbokas."
     
-    form = FORM.confirm("Är du säker på att du vill boka denna igenridning?")
+    form = FORM.confirm("Jag förstår, boka min igenridning!")
     if form.accepted:
         if db.rebooking.validate_and_insert(id_leason=leason_id, id_customer=cust_id, leason_date=leason_date):
-            redirect(URL('rebook.html'))
-    return dict(form=form)
+            session.flash=("Igenridningen är bokad!")
+            redirect(URL('index.html'))
+    return dict(form=form, helper=helper)
+
+def cancel_leason():
+    # The function to cancel a leason. This URL is created in list_leasondates function. The user id is for now passed here as a request.args but should obviously be migrated into the greater auth scheme
+    cust_id = request.args(0)
+    leason_id = request.args(1)
+    leason_date = request.args(2)
+
+    helper = "När du har avbokat en lektion så får du en igenridnings kredit. Den kan du använda för att rida igen din lektion som du nu avbokar. Tänk på att en avbokad lektion inte går att ångra."
+    form = FORM.confirm("Jag förstår reglerna, avboka min lektion.")
+    if form.accepted:
+        if db.cancelled_leasons.validate_and_insert(id_leason=leason_id, cancelled_date=leason_date, id_customer=cust_id, when_cancelled=datetime.now()):
+            session.flash=("Lektionen är avbokad!")
+            redirect(URL('index.html'))
+    return dict(form=form, helper=helper)
+
+    
 

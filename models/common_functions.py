@@ -61,10 +61,10 @@ def get_leason_history(cust_id,leason_id):
 def get_rebooked_leasons(cust_id):
     xleasons = []
     q=(db.rebooking.id_customer==cust_id)
-    s=db(q).select(db.rebooking.leason_date)
+    s=db(q).select()
     if len(s) > 0:
         for entry in s:
-            xleasons.append(entry["leason_date"])
+            xleasons.append({"leason_date":entry["leason_date"], "leason_id":entry["id_leason"]})
     return xleasons
 
 # Gather all black dates from the active semester and return them as a list 

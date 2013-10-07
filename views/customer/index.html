@@ -1,5 +1,8 @@
 {{extend 'layout.html'}}
-<h1>Here is your lessons {NAME}</h1>
+<h1>Lektioner för <b>{{=B(db.customer[cust_id]["name"])}} {{=(db.semester[retrieve_current_semester()]["name"])}}
+
+
+</h1>
 <b>rebook calendar is <a href="rebook.html">here</a></b>
 
 <div class="container" id="calendar">
@@ -20,4 +23,3 @@
     </div>
 </div>
 
-{{=BEAUTIFY(response._vars)}}
