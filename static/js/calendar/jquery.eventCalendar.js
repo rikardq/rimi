@@ -371,7 +371,15 @@
 
 					// add mark in the dayList to the days with events
 					if (eventYear == flags.wrap.attr('data-current-year') && eventMonth == flags.wrap.attr('data-current-month')) {
-						flags.wrap.find('.currentMonth .eventsCalendar-daysList #dayList_' + parseInt(eventDay)).addClass('dayWithEvents');
+
+                       var eventDayElement = flags.wrap.find('.currentMonth .eventsCalendar-daysList #dayList_' + parseInt(eventDay));
+                       //If type is defined in the event object use it as css class for the event
+                       //Maby we should prefix it ... .. .
+                        if(event.type) {
+                            eventDayElement.addClass(event.type);
+                        } else {
+                            eventDayElement.addClass('dayWithEvents');
+                        }
 					}
 
 				});
