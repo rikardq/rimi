@@ -35,7 +35,8 @@ def reverse_translate_weekday(weekd):
 # Retrieve the currently selected semester
 def retrieve_current_semester():
     active_semester = db(db.admin_settings.variable_name=="active_semester").select()[0]
-    return active_semester.variable_value
+    semester_info = db(db.semester.id==active_semester.variable_value).select()[0]
+    return active_semester.variable_value, semester_info.start_date, semester_info.end_date
 
 # This functions usage is questionable, and will be reworked
 def get_cancelled_leasons(cust_id,leason_id):
@@ -68,9 +69,10 @@ def get_rebooked_leasons(cust_id):
     return xleasons
 
 # Gather all black dates from the active semester and return them as a list 
-def get_black_dates(active_semester):
+def get_black_dates():
+    active_semester, start_date, end_date = retrieve_current_semester()
     xleasons = []
-    q=(db.black_dates.id_semester==active_semester)
+    q=(db.black_dates.black_date >= start_date) & (db.black_dates.black_date <= end_date)
     s=db(q).select(db.black_dates.black_date)
     if len(s) > 0:
         for entry in s:
@@ -133,3 +135,15 @@ def check_canx_time(leason_id):
         return False
     else:
         return True
+
+# Alters a customers credits
+def alter_credit(what,who,howmuch):
+    if what == "add":
+        new = db.customer[who].credits + howmuch
+        db.customer[who]=dict(credits=new)
+    if what == "subtract":
+        new = db.customer[who].credits - howmuch
+        db.customer[who]=dict(credits=new)
+
+
+

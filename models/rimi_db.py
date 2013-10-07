@@ -49,6 +49,7 @@ db.define_table("skill_level",
 
 db.define_table("customer",
       SQLField("name", "string", label="Namn", notnull=True, default=None),
+      SQLField("credits", "integer", label="Igenridningskrediter", notnull=True, default=0),
       SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'),
       format="%(name)s")
 
@@ -132,7 +133,6 @@ db.define_table("reserved_horses",
 
 #A black date is when the riding school is closed
 db.define_table("black_dates",
-      SQLField("id_semester", db.semester, label="Termin"),
       SQLField("black_date", "date", label="Datum", notnull=True, default=None))
 
 # A table for storing our instructors in. This will most likely be migrated
@@ -151,7 +151,6 @@ db.leasons.id_leason.requires=IS_IN_DB(db, 'leason.id', '%(week_day)s %(leason_t
 db.reserved_horses.id_customer.requires=IS_IN_DB(db, 'customer.id', '%(name)s')
 db.reserved_horses.id_horse.requires=IS_IN_DB(db, 'horse.id', '%(name)s')
 db.reserved_horses.id_leason.requires=IS_IN_DB(db, 'leason.id', '%(week_day)s %(leason_time)s')
-db.black_dates.id_semester.requires=IS_IN_DB(db, 'semester.id', '%(name)s')
 db.cancelled_leasons.id_customer.requires=IS_IN_DB(db, 'customer.id')
 db.cancelled_leasons.id_leason.requires=IS_IN_DB(db, 'leason.id')
 db.rebooking.id_leason.requires=IS_IN_DB(db, 'leason.id')

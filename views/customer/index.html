@@ -1,9 +1,12 @@
 {{extend 'layout.html'}}
-<h1>Lektioner för <b>{{=B(db.customer[cust_id]["name"])}} {{=(db.semester[retrieve_current_semester()]["name"])}}
+<h1>Lektioner för <b>{{=B(db.customer[cust_id]["name"])}} {{=(db.semester[retrieve_current_semester()[0]]["name"])}}
 
 
 </h1>
-<b>rebook calendar is <a href="rebook.html">here</a></b>
+{{if db.customer[cust_id].credits > 0:}}
+Du har igenridningskrediter att spendera! <b>rebook calendar is <a href="rebook.html">here</a></b>
+{{pass}}
+
 
 <div class="container" id="calendar">
     <div class="row">

@@ -74,10 +74,10 @@ def list_rebookings(customerid):
 
 
     # Lets get the active semester
-    active_semester = retrieve_current_semester()
+    active_semester = retrieve_current_semester()[0]
 
-    # Retrieve a list of the black dates for that semester
-    black_dates = get_black_dates(active_semester)
+    # Retrieve a list of the black dates
+    black_dates = get_black_dates()
 
     # Todays date, in datetime.date format to stay consistent.
     today=date(year=datetime.now().year,month=datetime.now().month,day=datetime.now().day)
@@ -193,10 +193,10 @@ def list_leasondates(customer):
     been cancelled should be hightlighted as such, data for that is retrieved from table cancelled_leasons
     '''
     # Lets get the active semester(function in model)
-    active_semester = retrieve_current_semester()
+    active_semester = retrieve_current_semester()[0]
 
-    # And retrieve a list of the black dates for that semester
-    black_dates = get_black_dates(active_semester)
+    # And retrieve a list of the black dates 
+    black_dates = get_black_dates()
 
     # The cust_id is the first argument in calling this function
     # But this is really bad. Uberbad. Do not do this. Query the database for the currently
@@ -368,13 +368,18 @@ def book_rebooking():
     leason_id = request.args(1)
     leason_date = request.args(2)
 
-    helper = "När du har bokat en igenridning så är din kredit förbrukad. En bokad igenridning går inte att boka om, eller avbokas."
-    
-    form = FORM.confirm("Jag förstår, boka min igenridning!")
-    if form.accepted:
-        if db.rebooking.validate_and_insert(id_leason=leason_id, id_customer=cust_id, leason_date=leason_date):
-            session.flash=("Igenridningen är bokad!")
-            redirect(URL('index.html'))
+    # Only proceed if there are credits to do this
+    if db.customer[cust_id].credits > 0:
+        helper = "När du har bokat en igenridning så är din kredit förbrukad. En bokad igenridning går inte att boka om, eller avbokas."
+        form = FORM.confirm("Jag förstår, boka min igenridning!")
+        if form.accepted:
+            if db.rebooking.validate_and_insert(id_leason=leason_id, id_customer=cust_id, leason_date=leason_date):
+                alter_credit("subtract",cust_id,1)
+                session.flash=("Igenridningen är bokad!")
+                redirect(URL('index.html'))
+    else:
+        session.flash=("Det går ej att boka igenridning utan igenridningskredit. För att få kredit måste man avboka en lektion.")
+        redirect(URL('index.html'))
     return dict(form=form, helper=helper)
 
 def cancel_leason():
@@ -387,8 +392,10 @@ def cancel_leason():
     form = FORM.confirm("Jag förstår reglerna, avboka min lektion.")
     if form.accepted:
         if db.cancelled_leasons.validate_and_insert(id_leason=leason_id, cancelled_date=leason_date, id_customer=cust_id, when_cancelled=datetime.now()):
+            alter_credit("add", cust_id, 1)
             session.flash=("Lektionen är avbokad!")
             redirect(URL('index.html'))
+
     return dict(form=form, helper=helper)
 
     

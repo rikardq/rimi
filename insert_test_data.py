@@ -39,9 +39,9 @@ db.leasons_history.insert(id_customer=1,id_leason=6,id_semester=1,leason_length=
 db.leasons_history.insert(id_customer=1,id_leason=6,id_semester=1,leason_length=60,leason_date="2013-09-21")
 db.leasons_history.insert(id_customer=1,id_leason=6,id_semester=1,leason_length=60,leason_date="2013-09-28")
 
-db.black_dates.insert(id_semester=1,black_date="2013-08-20")
-db.black_dates.insert(id_semester=1,black_date="2013-09-16")
-db.black_dates.insert(id_semester=1,black_date="2013-11-28")
+db.black_dates.insert(black_date="2013-08-20")
+db.black_dates.insert(black_date="2013-09-16")
+db.black_dates.insert(black_date="2013-11-28")
 
 db.horse.insert(name="Balder",status="Aktiv",horse_type="Ponny")
 db.horse.insert(name="Fanta",status="Aktiv",horse_type="Ponny")
