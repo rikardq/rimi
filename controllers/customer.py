@@ -154,7 +154,7 @@ def list_rebookings(customerid):
                         json_leasons.append({
                         "title":"Bokad igenridning",
                         "url":"",
-                        "type":"rebooking",
+                        "type":"rebooked",
                         "date":str(leason_time_epoch),
                         "description":"Du är inbokad på en igenridning. Status:?"  
                         })
@@ -261,7 +261,7 @@ def list_leasondates(customer):
                         "description":"Din lektion är avbokad.",
                         "title":"Avbokad",
                         "url":URL('viewleasondetails',args=[leason_data.id,leason_start_date]),
-                        "type":"viewhistorical",
+                        "type":"cancelled",
                         "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
                         })
                 # Adding another week to skipjump into the present(eventually)
@@ -309,7 +309,7 @@ def list_leasondates(customer):
                             "description":"",
                             "title":"Avbokad",
                             "url":"",
-                            "type":"viewfuture",
+                            "type":"cancelled",
                             "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
                         else:
                             leason_dates.append({
