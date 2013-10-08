@@ -9,6 +9,78 @@ lastcall
 empty = Is only returned if the array is empty(as in something went wrong, but lets not break the calendar)
 */
 
+/*
+
+viewfuture = Future dates that can be cancelled
+cancelled = Leasons that have been cancelled
+viewhistorical = Past leasons ridden
+rebooked = Leasons that are rebooked for a customer
+rebooking = Leasons that can be rebooked
+blackdate = Riding school closed
+lastcall(this is a special one if todays date is a leason date) = Other distinct color
+empty = Is only returned if the array is empty(as in something went wrong, but lets not break the calendar). It does not need its own color.
+
+*/
+
+
+/** FUTURE **/
+.eventsCalendar-daysList li.viewfuture a {
+    background:#89B814;
+    /*box-shadow:inset 5px 5px 10px #698B10;
+                 text-shadow: 2px 2px 2px #698B10;*/
+    color:#fff;
+}
+li.eventsCalendar-day.viewfuture a:hover {
+    background-color:#C2D374;
+    /*box-shadow:inset 5px 5px 10px #89B814;
+                     text-shadow: 2px 2px 2px #89B814;*/
+}
+
+
+/** CANCELLED **/
+.eventsCalendar-daysList li.cancelled a {
+    background: #b1eb14;
+    /*box-shadow:inset 5px 5px 10px #698B10;
+                 text-shadow: 2px 2px 2px #698B10;*/
+    color:#fff;
+}
+
+li.eventsCalendar-day.cancelled a:hover {
+    background-color: #e4f788;
+    /*box-shadow:inset 5px 5px 10px #89B814;
+                     text-shadow: 2px 2px 2px #89B814;*/
+}
+
+
+/** HISTORICAL **/
+.eventsCalendar-daysList li.viewhistorical a {
+    background: gray;
+    /*box-shadow:inset 5px 5px 10px #698B10;
+                 text-shadow: 2px 2px 2px #698B10;*/
+    color:#fff;
+    opacity: 0.5
+}
+
+li.eventsCalendar-day.viewhistorical a:hover {
+    background-color: #d3d3d3;
+    /*box-shadow:inset 5px 5px 10px #89B814;
+                     text-shadow: 2px 2px 2px #89B814;*/
+    opacity: 0.9
+
+}
+
+/** REBOOKED **/
+.eventsCalendar-daysList li.rebooked a {
+    background:#89B814;
+    /*box-shadow:inset 5px 5px 10px #698B10;
+                 text-shadow: 2px 2px 2px #698B10;*/
+    color:#fff;
+}
+li.eventsCalendar-day.rebooked a:hover {
+    background-color:#C2D374;
+    /*box-shadow:inset 5px 5px 10px #89B814;
+                     text-shadow: 2px 2px 2px #89B814;*/
+}
 
 /** REBOOKING **/
 .eventsCalendar-daysList li.rebooking a {
@@ -50,36 +122,6 @@ li.eventsCalendar-day.lastcall a:hover {
 }
 
 
-/** FUTURE **/
-.eventsCalendar-daysList li.viewfuture a {
-    background:#89B814;
-    /*box-shadow:inset 5px 5px 10px #698B10;
-                 text-shadow: 2px 2px 2px #698B10;*/
-    color:#fff;
-}
-li.eventsCalendar-day.viewfuture a:hover {
-    background-color:#C2D374;
-    /*box-shadow:inset 5px 5px 10px #89B814;
-                     text-shadow: 2px 2px 2px #89B814;*/
-}
-
-
-/** HISTORICAL **/
-.eventsCalendar-daysList li.viewhistorical a {
-    background: gray;
-    /*box-shadow:inset 5px 5px 10px #698B10;
-                 text-shadow: 2px 2px 2px #698B10;*/
-    color:#fff;
-    opacity: 0.5
-}
-
-li.eventsCalendar-day.viewhistorical a:hover {
-    background-color: #d3d3d3;
-    /*box-shadow:inset 5px 5px 10px #89B814;
-                     text-shadow: 2px 2px 2px #89B814;*/
-    opacity: 0.9
-
-}
 
 /** TODAY **/
 .eventsCalendar-daysList li.current a {
