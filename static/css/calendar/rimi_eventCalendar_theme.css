@@ -8,7 +8,6 @@ today = Other distinct color
 lastcall
 empty = Is only returned if the array is empty(as in something went wrong, but lets not break the calendar)
 */
-
 /*
 
 viewfuture = Future dates that can be cancelled
@@ -21,119 +20,101 @@ lastcall(this is a special one if todays date is a leason date) = Other distinct
 empty = Is only returned if the array is empty(as in something went wrong, but lets not break the calendar). It does not need its own color.
 
 */
-
-
+/** Common stuff **/
 /** FUTURE **/
 .eventsCalendar-daysList li.viewfuture a {
-    background:#89B814;
-    /*box-shadow:inset 5px 5px 10px #698B10;
-                 text-shadow: 2px 2px 2px #698B10;*/
-    color:#fff;
-}
-li.eventsCalendar-day.viewfuture a:hover {
-    background-color:#C2D374;
-    /*box-shadow:inset 5px 5px 10px #89B814;
-                     text-shadow: 2px 2px 2px #89B814;*/
-}
+  background-color: #89B814;
+  /*box-shadow:inset 5px 5px 10px #698B10;
+               text-shadow: 2px 2px 2px #698B10;*/
+  color: white; }
 
+li.eventsCalendar-day.viewfuture a:hover {
+  background-color: #C2D374;
+  /*box-shadow:inset 5px 5px 10px #89B814;
+                   text-shadow: 2px 2px 2px #89B814;*/ }
 
 /** CANCELLED **/
 .eventsCalendar-daysList li.cancelled a {
-    background: #b1eb14;
-    /*box-shadow:inset 5px 5px 10px #698B10;
-                 text-shadow: 2px 2px 2px #698B10;*/
-    color:#fff;
-}
+  background: #b1eb14;
+  /*box-shadow:inset 5px 5px 10px #698B10;
+               text-shadow: 2px 2px 2px #698B10;*/
+  color: white; }
 
 li.eventsCalendar-day.cancelled a:hover {
-    background-color: #e4f788;
-    /*box-shadow:inset 5px 5px 10px #89B814;
-                     text-shadow: 2px 2px 2px #89B814;*/
-}
-
+  background-color: #e4f788;
+  /*box-shadow:inset 5px 5px 10px #89B814;
+                   text-shadow: 2px 2px 2px #89B814;*/ }
 
 /** HISTORICAL **/
 .eventsCalendar-daysList li.viewhistorical a {
-    background: gray;
-    /*box-shadow:inset 5px 5px 10px #698B10;
-                 text-shadow: 2px 2px 2px #698B10;*/
-    color:#fff;
-    opacity: 0.5
-}
+  background: gray;
+  /*box-shadow:inset 5px 5px 10px #698B10;
+               text-shadow: 2px 2px 2px #698B10;*/
+  color: white;
+  opacity: 0.5; }
 
 li.eventsCalendar-day.viewhistorical a:hover {
-    background-color: #d3d3d3;
-    /*box-shadow:inset 5px 5px 10px #89B814;
-                     text-shadow: 2px 2px 2px #89B814;*/
-    opacity: 0.9
-
-}
+  background-color: #d3d3d3;
+  /*box-shadow:inset 5px 5px 10px #89B814;
+                   text-shadow: 2px 2px 2px #89B814;*/
+  opacity: 0.9; }
 
 /** REBOOKED **/
 .eventsCalendar-daysList li.rebooked a {
-    background:#89B814;
-    /*box-shadow:inset 5px 5px 10px #698B10;
-                 text-shadow: 2px 2px 2px #698B10;*/
-    color:#fff;
-}
+  background: #89B814;
+  /*box-shadow:inset 5px 5px 10px #698B10;
+               text-shadow: 2px 2px 2px #698B10;*/
+  color: white; }
+
 li.eventsCalendar-day.rebooked a:hover {
-    background-color:#C2D374;
-    /*box-shadow:inset 5px 5px 10px #89B814;
-                     text-shadow: 2px 2px 2px #89B814;*/
-}
+  background-color: #C2D374;
+  /*box-shadow:inset 5px 5px 10px #89B814;
+                   text-shadow: 2px 2px 2px #89B814;*/ }
 
 /** REBOOKING **/
 .eventsCalendar-daysList li.rebooking a {
-    background: #b1eb14;
-    /*box-shadow:inset 5px 5px 10px #698B10;
-                 text-shadow: 2px 2px 2px #698B10;*/
-    color:#fff;
-}
+  background: #b1eb14;
+  /*box-shadow:inset 5px 5px 10px #698B10;
+               text-shadow: 2px 2px 2px #698B10;*/
+  color: white; }
+
 li.eventsCalendar-day.rebooking a:hover {
-    background-color: #e4f788;
-    /*box-shadow:inset 5px 5px 10px #89B814;
-                     text-shadow: 2px 2px 2px #89B814;*/
-}
+  background-color: #e4f788;
+  /*box-shadow:inset 5px 5px 10px #89B814;
+                   text-shadow: 2px 2px 2px #89B814;*/ }
 
 /** BLACKDATE **/
 .eventsCalendar-daysList li.blackdate a {
-    background: #000000;
-    /*box-shadow:inset 5px 5px 10px #698B10;
-                 text-shadow: 2px 2px 2px #698B10;*/
-    color:#fff;
-}
+  background: #000000;
+  /*box-shadow:inset 5px 5px 10px #698B10;
+               text-shadow: 2px 2px 2px #698B10;*/
+  color: white; }
+
 li.eventsCalendar-day.blackdate a:hover {
-    background-color: #262626;
-    /*box-shadow:inset 5px 5px 10px #89B814;
-                     text-shadow: 2px 2px 2px #89B814;*/
-}
+  background-color: #262626;
+  /*box-shadow:inset 5px 5px 10px #89B814;
+                   text-shadow: 2px 2px 2px #89B814;*/ }
 
 /** LASTCALL **/
 .eventsCalendar-daysList li.lastcall a {
-    background: #e9322d;
-    /*box-shadow:inset 5px 5px 10px #698B10;
-                 text-shadow: 2px 2px 2px #698B10;*/
-    color:#fff;
-}
+  background: #e9322d;
+  /*box-shadow:inset 5px 5px 10px #698B10;
+               text-shadow: 2px 2px 2px #698B10;*/
+  color: white; }
+
 li.eventsCalendar-day.lastcall a:hover {
-    background-color: #ee5f5b;
-    /*box-shadow:inset 5px 5px 10px #89B814;
-                     text-shadow: 2px 2px 2px #89B814;*/
-}
-
-
+  background-color: #ee5f5b;
+  /*box-shadow:inset 5px 5px 10px #89B814;
+                   text-shadow: 2px 2px 2px #89B814;*/ }
 
 /** TODAY **/
 .eventsCalendar-daysList li.current a {
-    color:#fff;
-    background:#449FB2;
-    box-shadow:inset 5px 5px 10px #216B7A;
-    text-shadow: 2px 2px 2px #216B7A;
-}
+  color: white;
+  background: #449FB2;
+  box-shadow: inset 5px 5px 10px #216B7A;
+  text-shadow: 2px 2px 2px #216B7A; }
+
 li.eventsCalendar-day.current a:hover {
-    background-color:#79BDCC;
-    box-shadow:inset 5px 5px 10px #449FB2;
-    text-shadow: 2px 2px 2px #449FB2;
-}
-
-
+  background-color: #79BDCC;
+  box-shadow: inset 5px 5px 10px #449FB2;
+  text-shadow: 2px 2px 2px #449FB2; }

@@ -7,3 +7,4 @@ sessions/**
 *.pyc
 *.bak
 *.log
+.sass-cache
