@@ -145,6 +145,27 @@ db.define_table("owner_of_leason",
       SQLField("leason_id", db.leason),
       SQLField("instructor_id", db.instructor))
 
+
+# Define the message table
+db.define_table("messages",
+      SQLField("created", "date", label="Skapad", notnull=True, default=None),
+      SQLField("subject", "string", label="Ämne", notnull=True, default=None),
+      SQLField("body", "string", label="Medelande", notnull=True, default=None),
+      SQLField("attachement", "blob", label="Fil", notnull=False, default=None))
+
+# Define the message reference table, holds the end date for the message
+db.define_table("message_reference",
+      SQLField("message_id", db.messages, label="Skapad", notnull=True, default=None),
+      SQLField("to_id", db.customer, label="Till", notnull=True, default=None),
+      SQLField("from_id", db.instructor, label="Från", notnull=True, default=None),
+      SQLField("end_date", "date", label="Slut datum", notnull=True, default=None))
+
+# define constraint for message reference
+db.message_reference.message_id.requires=IS_IN_DB(db, "messages.id", 'Meddelande: %(subject)s')
+db.message_reference.to_id.requires=IS_IN_DB(db, "customer.id", 'Kund: %(name)s')
+db.message_reference.from_id.requires=IS_IN_DB(db, "instructor.id", 'Instruktör: %(name)s')
+# end message reference
+
 db.owner_of_leason.instructor_id.requires=IS_IN_DB(db, "instructor.id", 'Instruktör: %(name)s')
 db.leasons.id_customer.requires=IS_IN_DB(db, "customer.id", 'Namn: %(name)s')
 db.leasons.id_leason.requires=IS_IN_DB(db, 'leason.id', '%(week_day)s %(leason_time)s')
