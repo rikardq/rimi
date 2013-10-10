@@ -1,0 +1,44 @@
+{{extend 'layout.html'}}
+<h2> Du kikar nu på vecka: <b>{{=week}} {{=year}}</b></h2>
+<A HREF="{{=URL('view_leasons_week', args=[backz])}}">
+<i class="icon-arrow-left"></i>
+</A>
+
+
+<A HREF="
+
+{{try:
+=URL('view_leasons_week', args=[forward,forwardyear])
+except:
+=URL('view_leasons_week', args=[forward])}}
+{{pass}}
+
+
+
+">
+<i class="icon-arrow-right"></i>
+</A>
+
+
+<div class="table-responsive">
+<table class="table table-striped">
+<tr>
+    <td><h3>Måndag </td>
+    <td><h3>Tisdag </td>
+    <td><h3>Onsdag </td>
+    <td><h3>Torsdag </td>
+    <td><h3>Fredag </td>
+    <td><h3>Lördag </td>
+    <td><h3>Söndag </td>
+</tr>
+<tr>
+    <td>{{=str(datez["Måndag"])}}</td>
+    <td>{{=str(datez["Tisdag"])}}</td>
+    <td>{{=str(datez["Onsdag"])}}</td>
+    <td>{{=str(datez["Torsdag"])}}</td>
+    <td>{{=str(datez["Fredag"])}}</td>
+    <td>{{=str(datez["Lördag"])}}</td>
+    <td>{{=str(datez["Måndag"])}}</td>
+</tr>
+</table>
+</div>
