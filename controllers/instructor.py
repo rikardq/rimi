@@ -51,11 +51,18 @@ def view_leasons_week():
     lastweekofyear = Week.last_week_of_year(year)[1]
 
     if lastweekofyear == week:
-        forward = 1
+        forwardweek = 1
         forwardyear = year + 1
     else:
-        forward = week + 1
-    backz = week - 1
+        forwardweek = week + 1
+        forwardyear = year 
+
+    if week == 1: 
+        backyear = year -1
+        backweek = Week.last_week_of_year(backyear)[1] 
+    else:
+        backyear = year
+        backweek = week - 1
 
     error = []
     firstdayinweek = Week(year, week).monday()

@@ -1,21 +1,10 @@
 {{extend 'layout.html'}}
 <h2> Du kikar nu på vecka: <b>{{=week}} {{=year}}</b></h2>
-<A HREF="{{=URL('view_leasons_week', args=[backz])}}">
+<A HREF="{{=URL('view_leasons_week', args=[backweek,backyear])}}">
 <i class="icon-arrow-left"></i>
 </A>
 
-
-<A HREF="
-
-{{try:
-=URL('view_leasons_week', args=[forward,forwardyear])
-except:
-=URL('view_leasons_week', args=[forward])}}
-{{pass}}
-
-
-
-">
+<A HREF="{{=URL('view_leasons_week', args=[forwardweek,forwardyear])}}">
 <i class="icon-arrow-right"></i>
 </A>
 
@@ -38,7 +27,7 @@ except:
     <td>{{=str(datez["Torsdag"])}}</td>
     <td>{{=str(datez["Fredag"])}}</td>
     <td>{{=str(datez["Lördag"])}}</td>
-    <td>{{=str(datez["Måndag"])}}</td>
+    <td>{{=str(datez["Söndag"])}}</td>
 </tr>
 </table>
 </div>
