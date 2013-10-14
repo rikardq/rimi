@@ -8,3 +8,4 @@ sessions/**
 *.bak
 *.log
 .sass-cache
+isoweek-1.2.0/**
