@@ -21,100 +21,73 @@ empty = Is only returned if the array is empty(as in something went wrong, but l
 
 */
 /** Common stuff **/
+/*Colors */
 /** FUTURE **/
 .eventsCalendar-daysList li.viewfuture a {
-  background-color: #89B814;
-  /*box-shadow:inset 5px 5px 10px #698B10;
-               text-shadow: 2px 2px 2px #698B10;*/
+  background-color: #46a546;
   color: white; }
 
 li.eventsCalendar-day.viewfuture a:hover {
-  background-color: #C2D374;
-  /*box-shadow:inset 5px 5px 10px #89B814;
-                   text-shadow: 2px 2px 2px #89B814;*/ }
+  background-color: #a9dba9; }
 
 /** CANCELLED **/
 .eventsCalendar-daysList li.cancelled a {
-  background: #b1eb14;
-  /*box-shadow:inset 5px 5px 10px #698B10;
-               text-shadow: 2px 2px 2px #698B10;*/
+  background: #ffc40d;
   color: white; }
 
 li.eventsCalendar-day.cancelled a:hover {
-  background-color: #e4f788;
-  /*box-shadow:inset 5px 5px 10px #89B814;
-                   text-shadow: 2px 2px 2px #89B814;*/ }
+  background-color: #ffe9a6; }
 
 /** HISTORICAL **/
 .eventsCalendar-daysList li.viewhistorical a {
-  background: gray;
-  /*box-shadow:inset 5px 5px 10px #698B10;
-               text-shadow: 2px 2px 2px #698B10;*/
+  background: #999999;
   color: white;
   opacity: 0.5; }
 
 li.eventsCalendar-day.viewhistorical a:hover {
-  background-color: #d3d3d3;
-  /*box-shadow:inset 5px 5px 10px #89B814;
-                   text-shadow: 2px 2px 2px #89B814;*/
+  background-color: #e6e6e6;
   opacity: 0.9; }
 
 /** REBOOKED **/
 .eventsCalendar-daysList li.rebooked a {
-  background: #89B814;
-  /*box-shadow:inset 5px 5px 10px #698B10;
-               text-shadow: 2px 2px 2px #698B10;*/
+  background: #89b814;
   color: white; }
 
 li.eventsCalendar-day.rebooked a:hover {
-  background-color: #C2D374;
-  /*box-shadow:inset 5px 5px 10px #89B814;
-                   text-shadow: 2px 2px 2px #89B814;*/ }
+  background-color: #cdf075; }
 
 /** REBOOKING **/
 .eventsCalendar-daysList li.rebooking a {
   background: #b1eb14;
-  /*box-shadow:inset 5px 5px 10px #698B10;
-               text-shadow: 2px 2px 2px #698B10;*/
   color: white; }
 
 li.eventsCalendar-day.rebooking a:hover {
-  background-color: #e4f788;
-  /*box-shadow:inset 5px 5px 10px #89B814;
-                   text-shadow: 2px 2px 2px #89B814;*/ }
+  background-color: #e0f7a1; }
 
 /** BLACKDATE **/
 .eventsCalendar-daysList li.blackdate a {
-  background: #000000;
-  /*box-shadow:inset 5px 5px 10px #698B10;
-               text-shadow: 2px 2px 2px #698B10;*/
+  background: #222222;
   color: white; }
 
 li.eventsCalendar-day.blackdate a:hover {
-  background-color: #262626;
-  /*box-shadow:inset 5px 5px 10px #89B814;
-                   text-shadow: 2px 2px 2px #89B814;*/ }
+  background-color: #6f6f6f; }
 
 /** LASTCALL **/
 .eventsCalendar-daysList li.lastcall a {
-  background: #e9322d;
-  /*box-shadow:inset 5px 5px 10px #698B10;
-               text-shadow: 2px 2px 2px #698B10;*/
+  background: #9d261d;
   color: white; }
 
 li.eventsCalendar-day.lastcall a:hover {
-  background-color: #ee5f5b;
-  /*box-shadow:inset 5px 5px 10px #89B814;
-                   text-shadow: 2px 2px 2px #89B814;*/ }
+  background-color: #e4776f; }
 
 /** TODAY **/
 .eventsCalendar-daysList li.current a {
   color: white;
-  background: #449FB2;
+  background: #049cdb;
   box-shadow: inset 5px 5px 10px #216B7A;
   text-shadow: 2px 2px 2px #216B7A; }
 
 li.eventsCalendar-day.current a:hover {
-  background-color: #79BDCC;
+  background-color: #7bd7fd;
   box-shadow: inset 5px 5px 10px #449FB2;
   text-shadow: 2px 2px 2px #449FB2; }
