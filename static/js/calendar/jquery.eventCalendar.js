@@ -61,7 +61,6 @@
 		})
 
 
-
 	});
 
 	// show event description
@@ -376,6 +375,10 @@
                        //If type is defined in the event object use it as css class for the event
                        //Maby we should prefix it ... .. .
                         if(event.type) {
+
+                            eventDayElement.attr("data-toggle", "tooltip");
+                            eventDayElement.attr("data-placement", "top");
+                            eventDayElement.attr("title", event.title + " " + event.type);
                             eventDayElement.addClass(event.type);
                         } else {
                             eventDayElement.addClass('dayWithEvents');
@@ -437,6 +440,8 @@
 		flags.wrap.find('.eventsCalendar-list-wrap').width(flags.wrap.width() + 'px');
 
 	}
+
+    return flags.wrap;
 };
 
 
