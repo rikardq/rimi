@@ -1,0 +1,24 @@
+{{extend 'layout.html'}}
+<h2> Du kikar nu på: <b>{{=thisweekday}} {{=thisdate}}</b></h2>
+
+<div class="table-responsive">
+<table class="table table-striped">
+<tr>
+    <td><h4>Tid</td>
+    <td>Ordinare antal ryttare</td>
+    <td>Antal ryttare idag, total</td>
+    <td>Av dessa, igenridningar</td>
+    <td>Avbokade </td>
+</tr>
+{{for leason in leason_data:
+}}
+<tr>
+    <td>{{=leason[0]}}</td>
+    <td>{{=leason[1]}}</td>
+    <td>{{=leason[2]}}</td>
+    <td>{{=leason[3]}}</td>
+    <td>{{=leason[4]}}</td>
+{{pass}}
+</table>
+</div>
+

@@ -18,24 +18,23 @@ What can an instructor do?
 """
 
 def test():
-    return(obtain_leason_dates(1))
+    #return(obtain_leason_dates(1))
+    return dict(ass="asses")
 
-def obtain_leason_info(leasonswd):
-    # Sort the list of dicts
-    sortedleasons = sorted(leasonswd, key=lambda k: k['leason_time'])
-    return sortedleasons
+def view_leason():
+    return request.args[0] + request.args[1]
 
-"""
-    leason_info = db(db.leason.id==leason_id).select()[0]
-    weekday = leason_info.week_day
-    numweekday = reverse_translate_weekday(weekday) 
-    leason_startdate = get_firstdate_weekday(numweekday, today)
-
-    return dict(a=leason_info,b=weekday,c=numweekday,d=leason_startdate)
-"""
-
-
-
+def view_leasons_day():
+    out = "" 
+    thisdate = request.args[0]
+    thisdate = date(int(thisdate[:4]),int(thisdate[5:7]),int(thisdate[8:10]))
+    thisweekday = translate_weekday(thisdate.weekday())
+    # Get the data stored in session for this day
+    leason_data = session.display_week[thisweekday]
+        
+    return dict(leason_data=leason_data,thisdate=thisdate,thisweekday=thisweekday)
+    
+    
 
 
 def view_leasons_week():
@@ -80,6 +79,7 @@ def view_leasons_week():
     "Söndag":Week(year, week).sunday()}
     display_week = {"Måndag":[],"Tisdag":[],"Onsdag":[],"Torsdag":[],"Fredag":[],"Lördag":[],"Söndag":[]}
     display_week2 = {"Måndag":[],"Tisdag":[],"Onsdag":[],"Torsdag":[],"Fredag":[],"Lördag":[],"Söndag":[]}
+    weekdays = ["Måndag","Tisdag","Onsdag","Torsdag","Fredag","Lördag","Söndag"]
 
     # Go through the leasons and place them into appropriate spot in week dict
     for leason in leasons:
@@ -91,7 +91,7 @@ def view_leasons_week():
             num_rebooks = db((db.rebooking.id_leason==ldata.id) & (db.rebooking.approval=="yes") & (db.rebooking.leason_date==this_date)).count()
             num_canx = db((db.cancelled_leasons.id_leason==ldata.id) & (db.cancelled_leasons.cancelled_date==this_date)).count() 
             num_total= num_riders - num_canx + num_rebooks
-            display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":num_riders,"num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total})
+            display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":num_riders,"num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total,"this_date":this_date})
         except:
             error.append("Unable to add data for record ",ldata.id) 
 
@@ -101,11 +101,13 @@ def view_leasons_week():
         if daylist > 0:
             daylist = sorted(daylist, key=lambda k: k['leason_time'])
             for entry in daylist:
-                # Make the fucking link and display here:
-                #display_week2[day].append([entry["leason_time"],entry["num_total"],entry["num_rebooks"],entry["num_canx"],entry["id"]])
-                display_week2[day].append(A(entry["leason_time"], _href=URL('fuck', args=[entry["id"]])))
-               # display_week2[day] = daylist
+                # Just create a sorted list
+                display_week2[day].append([entry["leason_time"],entry["num_riders"],entry["num_total"],entry["num_rebooks"],entry["num_canx"],entry["id"]])
 
+    # TESTING. Save the display_week variable in the session
+    session.display_week = display_week2
+
+    #
 
     return locals() 
 

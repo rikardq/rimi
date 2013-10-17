@@ -12,70 +12,34 @@
 <div class="table-responsive">
 <table class="table table-striped">
 <tr>
-    <td><h3>Måndag </td>
-    <td><h3>Tisdag </td>
-    <td><h3>Onsdag </td>
-    <td><h3>Torsdag </td>
-    <td><h3>Fredag </td>
-    <td><h3>Lördag </td>
-    <td><h3>Söndag </td>
+    {{for wday in weekdays:}}
+    <td><h3>{{=wday}}</td>
+    {{pass}}
 </tr>
 <tr>
-    <td>{{=str(datez["Måndag"])}}</td>
-    <td>{{=str(datez["Tisdag"])}}</td>
-    <td>{{=str(datez["Onsdag"])}}</td>
-    <td>{{=str(datez["Torsdag"])}}</td>
-    <td>{{=str(datez["Fredag"])}}</td>
-    <td>{{=str(datez["Lördag"])}}</td>
-    <td>{{=str(datez["Söndag"])}}</td>
+    {{for wday in weekdays:}}
+        <td>{{=A(str(datez[wday]), _href=URL('view_leasons_day', args=[str(datez[wday])]))}}</td>
+    {{pass}}
 </tr>
 <tr>
+    {{for wday in weekdays:}}
     <td>
-    {{for entry in display_week2["Måndag"]:}}
-    <br>
-    {{=entry}} 
-    {{pass}}
+        {{if len(display_week2[wday]) > 0:}}
+            <table>
+            <tr> 
+            {{for entry in display_week2[wday]:}}
+                <td> 
+                {{=entry[0]}} 
+                </td>
+                <td> 
+                {{=entry[1]}} 
+                </td>
+            </tr>
+            {{pass}}
+            </table>
+        {{pass}}
     </td>
-
-    <td>
-    {{for entry in display_week2["Tisdag"]:}}
-    <br>
-    {{=entry}} 
     {{pass}}
-    </td>
-
-
-    <td>
-    {{for entry in display_week2["Onsdag"]:}}
-    <br>
-    {{=entry}} 
-    {{pass}}
-    </td>
-
-    <td>
-    {{for entry in display_week2["Torsdag"]:}}
-    <br>
-    {{=entry}} 
-    {{pass}}
-    </td>
-    <td>
-    {{for entry in display_week2["Fredag"]:}}
-    <br>
-    {{=entry}} 
-    {{pass}}
-    </td>
-    <td>
-    {{for entry in display_week2["Lördag"]:}}
-    <br>
-    {{=entry}} 
-    {{pass}}
-    </td>
-    <td>
-    {{for entry in display_week2["Söndag"]:}}
-    <br>
-    {{=entry}} 
-    {{pass}}
-    </td>
 
 
 </tr>
