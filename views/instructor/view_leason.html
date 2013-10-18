@@ -1,0 +1,42 @@
+{{extend 'layout.html'}}
+<h2> Du kikar nu på: <b>{{=thisweekday}} {{=thisdate}}, {{=str(leason_data.leason_time)[:5]}}</b></h2>
+
+<div class="table-responsive">
+<table class="table">
+<tr> 
+    <td><h4>Namn</td>
+    <td>Status</td>
+</tr>
+{{if num_riders > 0:}}
+    {{for rider in reg_riders:
+        if rider not in canx_riders:}}
+        <tr bgcolor="#669900">
+        <td>{{=rider["name"]}}</td>
+        <td>Reguljär ryttare</td>
+        </tr>
+        {{pass}}
+    {{pass}}
+{{pass}}
+
+{{if num_rebooks > 0:}}
+    {{for rider in rebook_riders:}}
+        <tr bgcolor="#66FF99">
+        <td>{{=rider["name"]}}</td>
+        <td>Igenridning</td>
+        </tr>
+    {{pass}}
+{{pass}}
+    
+{{if num_canx > 0:}}
+    {{for rider in canx_riders:}}
+        <tr bgcolor="#CC3300">
+        <td>{{=rider["name"]}}</td>
+        <td>Avbokat</td>
+        </tr>
+    {{pass}}
+{{pass}}
+
+
+</table>
+</div>
+

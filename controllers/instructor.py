@@ -17,20 +17,36 @@ What can an instructor do?
 - Administrate horse-selections to its leasons/riders
 """
 
-def test():
-    #return(obtain_leason_dates(1))
-    return dict(ass="asses")
+def index():
+    return dict(message="w00t")
 
 def view_leason():
-    return request.args[0] + request.args[1]
-
-def view_leasons_day():
-    out = "" 
-    thisdate = request.args[0]
+    leason_id = request.args[0]
+    thisdate = request.args[1]
     thisdate = date(int(thisdate[:4]),int(thisdate[5:7]),int(thisdate[8:10]))
     thisweekday = translate_weekday(thisdate.weekday())
-    # Get the data stored in session for this day
-    leason_data = session.display_week[thisweekday]
+    leason_data = db(db.leason.id == leason_id).select()[0]
+    num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(thisdate,leason_id)
+    return locals()
+
+def view_leasons_day():
+    #Check if date carried over, if not assume today
+    if len(request.args) == 0: 
+        thisdate = datetime.today().date()
+    else:
+        thisdate = request.args[0]
+        thisdate = date(int(thisdate[:4]),int(thisdate[5:7]),int(thisdate[8:10]))
+    thisweekday = translate_weekday(thisdate.weekday())
+    leason_data = []
+
+    # See what leasons matches this weekday for this instructor
+    for leason in leasons:
+        leason_id = leason["leason_id"]
+        if db(db.leason.id==leason_id).select(db.leason.week_day)[0]["week_day"] == thisweekday:
+            num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(thisdate,leason_id)
+            leason_data.append([str(leason_time)[:5],num_riders,num_total,num_rebooks,num_canx,leason_id])
+            
+
         
     return dict(leason_data=leason_data,thisdate=thisdate,thisweekday=thisweekday)
     
@@ -87,10 +103,9 @@ def view_leasons_week():
             ldata = db(db.leason.id==leason.leason_id).select()[0]
             # this leasons date in this view
             this_date = datez[ldata.week_day]
-            num_riders = db(db.leasons.id_leason==ldata.id).count()
-            num_rebooks = db((db.rebooking.id_leason==ldata.id) & (db.rebooking.approval=="yes") & (db.rebooking.leason_date==this_date)).count()
-            num_canx = db((db.cancelled_leasons.id_leason==ldata.id) & (db.cancelled_leasons.cancelled_date==this_date)).count() 
-            num_total= num_riders - num_canx + num_rebooks
+            # Use internal function to retrieve statistics and rider details(rider details will not be used here)
+            num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(this_date,ldata.id)
+
             display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":num_riders,"num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total,"this_date":this_date})
         except:
             error.append("Unable to add data for record ",ldata.id) 
@@ -104,11 +119,8 @@ def view_leasons_week():
                 # Just create a sorted list
                 display_week2[day].append([entry["leason_time"],entry["num_riders"],entry["num_total"],entry["num_rebooks"],entry["num_canx"],entry["id"]])
 
-    # TESTING. Save the display_week variable in the session
+    # Lets not do this, it will mess with the data when it is updated, and when a user uses the back button. Keep querying the db everytime. Save the display_week variable in the session
     session.display_week = display_week2
-
-    #
-
     return locals() 
 
 

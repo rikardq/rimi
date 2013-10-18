@@ -13,7 +13,7 @@
 {{for leason in leason_data:
 }}
 <tr>
-    <td>{{=leason[0]}}</td>
+    <td>{{=A(leason[0], _href=URL('view_leason',args=[leason[5],str(thisdate)])) }}</td>
     <td>{{=leason[1]}}</td>
     <td>{{=leason[2]}}</td>
     <td>{{=leason[3]}}</td>
