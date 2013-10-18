@@ -326,22 +326,6 @@ def list_leasondates(customer):
     except:
         errormessage = "Unable to select customer leasons!"
 
-    # Add all black dates
-    for black_date in black_dates:
-        leason_dates.append({"title":"Ridskolan Stängd","url":"","type":"blackdate","date":str(convert_dt_to_epoch(black_date,dttime(12,0))),"description":"Ridskolan är stängd denna dag"})
-
-    # Add all rebooked dates
-    for rebooked_leason in rebooked_leasons: 
-        # Get the time of the leason that was rebooked...
-        rb_ltime = db.leason[rebooked_leason["leason_id"]]["leason_time"]
-        leason_dates.append({
-        "title":"Igenridning",
-        "url":"",
-        "type":"rebooking",
-        "date":str(convert_dt_to_epoch(rebooked_leason["leason_date"],rb_ltime)),"description":"Du har bokat en igenridning"})
-
-
-
     # Now we have one list for each leason in the master_leasons. We must pop this out and make 
     # one list to rule them all. 
     newmaster = []
@@ -352,11 +336,25 @@ def list_leasondates(customer):
             newmaster.append(entry)
         startnum = startnum + 1
 
+    # Add all black dates
+    for black_date in black_dates:
+        newmaster.append({"title":"Ridskolan Stängd","url":"","type":"blackdate","date":str(convert_dt_to_epoch(black_date,dttime(12,0))),"description":"Ridskolan är stängd denna dag"})
+
+    # Add all rebooked dates
+    for rebooked_leason in rebooked_leasons: 
+        # Get the time of the leason that was rebooked...
+        rb_ltime = db.leason[rebooked_leason["leason_id"]]["leason_time"]
+        newmaster.append({
+        "title":"Igenridning",
+        "url":"",
+        "type":"rebooking",
+        "date":str(convert_dt_to_epoch(rebooked_leason["leason_date"],rb_ltime)),"description":"Du har bokat en igenridning"})
+
+
+
     if len(newmaster) < 1:
         newmaster.append({"description":"ASSA","title":"empty","url":"empty","type":"empty","date":"1381766400000"})
 
-    #json_newmaster = json.dumps({"success":1,"result":newmaster},sort_keys=True,indent=4, separators=(',', ': '))
-    #return json_newmaster
     newmaster = json.dumps(newmaster)
     return str(newmaster)
 
