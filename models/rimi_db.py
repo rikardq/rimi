@@ -41,7 +41,7 @@ db.define_table("admin_settings",
 
 db.define_table("skill_level",
       SQLField("skill_name", "string", label="Namn", notnull=True, default=None),
-      SQLField("skill_point", "integer", requires=IS_IN_SET(range(1,50)), label="Poäng"),
+      SQLField("skill_point", "integer", requires=IS_IN_SET(range(1,100)), label="Poäng"),
       SQLField("skill_type", "string", requires=IS_IN_SET(["Ponny","Häst","Blandad"]), label="Typ"))
 
 # The customer table. This will be replaced eventually with the builtin auth
@@ -65,10 +65,10 @@ db.define_table("semester",
 #A leason is created in this table. It is tied to a skill level.
 db.define_table("leason",
       SQLField("week_day", requires=IS_IN_SET(['Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag','Söndag']), label="Veckodag" ),
-      SQLField("leason_time", "time", label="Tid när lektionen börjar", notnull=True, default=None),
-      SQLField("leason_length", "integer", label="Längd på lektion, i minuter", notnull=True, default=None),
-      SQLField("max_customers", "integer", label="Max antal ryttare i gruppen", notnull=True, default=None),
-      SQLField("skill_level", db.skill_level, label="Välj nivå på gruppen"),
+      SQLField("leason_time", "time", label="Lektionen startar", notnull=True, default=None),
+      SQLField("leason_length", "integer", label="Längd, i minuter", notnull=True, default=60),
+      SQLField("max_customers", "integer", label="Max ryttare i gruppen", notnull=True, default=None),
+      SQLField("skill_level", db.skill_level, label="Nivå", notnull=True),
       SQLField("status", "string", requires=IS_IN_SET(['Aktiv','Inaktiv']), default='Aktiv'),
       SQLField("leason_type", "string", label="Lektionstyp", requires=IS_IN_SET(['Ponny','Häst','Blandad'])))
 
@@ -166,8 +166,8 @@ db.message_reference.to_id.requires=IS_IN_DB(db, "customer.id", 'Kund: %(name)s'
 db.message_reference.from_id.requires=IS_IN_DB(db, "instructor.id", 'Instruktör: %(name)s')
 # end message reference
 
-db.owner_of_leason.instructor_id.requires=IS_IN_DB(db, "instructor.id", 'Instruktör: %(name)s')
-db.leasons.id_customer.requires=IS_IN_DB(db, "customer.id", 'Namn: %(name)s')
+db.owner_of_leason.instructor_id.requires=IS_IN_DB(db, "instructor.id", '%(name)s')
+db.leasons.id_customer.requires=IS_IN_DB(db, "customer.id", '%(name)s')
 db.leasons.id_leason.requires=IS_IN_DB(db, 'leason.id', '%(week_day)s %(leason_time)s')
 db.reserved_horses.id_customer.requires=IS_IN_DB(db, 'customer.id', '%(name)s')
 db.reserved_horses.id_horse.requires=IS_IN_DB(db, 'horse.id', '%(name)s')
@@ -176,6 +176,6 @@ db.cancelled_leasons.id_customer.requires=IS_IN_DB(db, 'customer.id')
 db.cancelled_leasons.id_leason.requires=IS_IN_DB(db, 'leason.id')
 db.rebooking.id_leason.requires=IS_IN_DB(db, 'leason.id')
 db.rebooking.id_customer.requires=IS_IN_DB(db, 'customer.id')
-db.leason.skill_level.requires=IS_IN_DB(db, 'skill_level.id', '%(skill_name)s')
+db.leason.skill_level.requires=IS_IN_DB(db, 'skill_level.id', '%(skill_name)s') 
 db.owner_of_leason.leason_id.requires=IS_IN_DB(db, "leason.id", '%(week_day)s %(leason_time)s')
 db.owner_of_leason.instructor_id.requires=IS_IN_DB(db, "instructor.id", 'Instruktör: %(name)s')

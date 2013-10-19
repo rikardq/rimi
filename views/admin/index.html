@@ -1,0 +1,18 @@
+{{extend 'layout.html'}}
+<div class="container-fluid">
+  <div class="row-fluid">
+      <div class="span2" id="menu">
+        <!--Sidebar content-->
+        {{=A('Hästar', callback=URL('horses'), target="content")}}
+        <br>
+        {{=A('Kunder', callback=URL('customers'), target="content")}}
+        <br>
+        {{=A('Lektioner', callback=URL('leasons'), target="content")}}
+        <br>
+        {{=A('Lektionsnivåer', callback=URL('levels'), target="content")}}
+      </div>
+      <div class="span10" id="content">
+        <!--Body content-->
+      </div>
+  </div>
+</div>
