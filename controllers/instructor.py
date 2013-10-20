@@ -21,7 +21,7 @@ def index():
     return dict(message="w00t")
 
 def view_leason():
-    leason_id = request.args[0]
+    leason_id = request.args(0)
     thisdate = request.args[1]
     thisdate = date(int(thisdate[:4]),int(thisdate[5:7]),int(thisdate[8:10]))
     thisweekday = translate_weekday(thisdate.weekday())

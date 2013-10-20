@@ -48,10 +48,13 @@ db.define_table("skill_level",
 # table web2py uses.
 
 db.define_table("customer",
-      SQLField("name", "string", label="Namn", notnull=True, default=None),
+      SQLField("first_name", "string", label="Förnamn", notnull=True, default=""),
+      SQLField("last_name", "string", label="Efternamn", notnull=True, default=""),
       SQLField("credits", "integer", label="Igenridningskrediter", notnull=True, default=0),
+      SQLField("auth_user_id", db.auth_user, notnull=False),
       SQLField("status", "string", requires=IS_IN_SET(['Active','Inactive']), default='Active'),
-      format="%(name)s")
+      format="%(first_name)s %(last_name)s")
+      
 
 
 #Here we define semesters
@@ -162,14 +165,14 @@ db.define_table("message_reference",
 
 # define constraint for message reference
 db.message_reference.message_id.requires=IS_IN_DB(db, "messages.id", 'Meddelande: %(subject)s')
-db.message_reference.to_id.requires=IS_IN_DB(db, "customer.id", 'Kund: %(name)s')
+db.message_reference.to_id.requires=IS_IN_DB(db, "customer.id", 'Kund: %(first_name)s %(last_name)s')
 db.message_reference.from_id.requires=IS_IN_DB(db, "instructor.id", 'Instruktör: %(name)s')
 # end message reference
 
 db.owner_of_leason.instructor_id.requires=IS_IN_DB(db, "instructor.id", '%(name)s')
-db.leasons.id_customer.requires=IS_IN_DB(db, "customer.id", '%(name)s')
+db.leasons.id_customer.requires=IS_IN_DB(db, "customer.id", '%(first_name)s %(last_name)s')
 db.leasons.id_leason.requires=IS_IN_DB(db, 'leason.id', '%(week_day)s %(leason_time)s')
-db.reserved_horses.id_customer.requires=IS_IN_DB(db, 'customer.id', '%(name)s')
+db.reserved_horses.id_customer.requires=IS_IN_DB(db, 'customer.id', '%(first_name)s %(last_name)s')
 db.reserved_horses.id_horse.requires=IS_IN_DB(db, 'horse.id', '%(name)s')
 db.reserved_horses.id_leason.requires=IS_IN_DB(db, 'leason.id', '%(week_day)s %(leason_time)s')
 db.cancelled_leasons.id_customer.requires=IS_IN_DB(db, 'customer.id')
@@ -179,3 +182,4 @@ db.rebooking.id_customer.requires=IS_IN_DB(db, 'customer.id')
 db.leason.skill_level.requires=IS_IN_DB(db, 'skill_level.id', '%(skill_name)s') 
 db.owner_of_leason.leason_id.requires=IS_IN_DB(db, "leason.id", '%(week_day)s %(leason_time)s')
 db.owner_of_leason.instructor_id.requires=IS_IN_DB(db, "instructor.id", 'Instruktör: %(name)s')
+db.customer.auth_user_id.requires=IS_IN_DB(db, "auth_user.id", '%(first_name)s %(last_name)s')

@@ -12,7 +12,7 @@ db.leason.insert(week_day="Torsdag",leason_time="18:00:00",leason_length=60,max_
 db.leason.insert(week_day="Fredag",leason_time="18:00:00",leason_length=60,max_customers=6, skill_level=2,status="Active",leason_type="Ponny")
 db.leason.insert(week_day="Lördag",leason_time="18:00:00",leason_length=60,max_customers=6, skill_level=2,status="Active",leason_type="Ponny")
 db.leason.insert(week_day="Söndag",leason_time="18:00:00",leason_length=60,max_customers=6, skill_level=1,status="Active",leason_type="Ponny")
-db.customer.insert(name="Rikard Rikardsson",status="Active")
+db.customer.insert(first_name="Rikard", last_name="Rikardsson",status="Active")
 db.leasons.insert(id_customer=1,id_leason=1)
 db.leasons.insert(id_customer=1,id_leason=2)
 db.leasons.insert(id_customer=1,id_leason=4)

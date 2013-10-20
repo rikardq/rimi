@@ -1,5 +1,5 @@
 {{extend 'layout.html'}}
-<h1>Lektioner för <b>{{=B(db.customer[cust_id]["name"])}} {{=(db.semester[retrieve_current_semester()[0]]["name"])}}
+<h1>Lektioner för <b>{{=B(db.customer[cust_id]["first_name"])}} {{=B(db.customer[cust_id]["last_name"])}}  {{=(db.semester[retrieve_current_semester()[0]]["name"])}}
 
 
 </h1>
