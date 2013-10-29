@@ -5,13 +5,14 @@
         <!--Sidebar content-->
         {{=A('Hästar', callback=URL('horses'), target="content")}}
         <br>
-        {{=A('Kunder', callback=URL('customers'), target="content")}}
+        {{=A('Kunder', _href=URL(c='admin_customer', f='index'))}}
         <br>
         {{=A('Lektioner', callback=URL('leasons'), target="content")}}
         <br>
         {{=A('Lektionsnivåer', callback=URL('levels'), target="content")}}
         <br>
         {{=A('Ehh. SvartaDatum..', callback=URL('blackdates'), target="content")}}
+        <br>
       </div>
       <div class="span10" id="content">
         <!--Body content-->

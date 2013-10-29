@@ -26,6 +26,7 @@ response.google_analytics_id = None
 response.menu = [
     (T('Home'), False, URL(c='default',f='index'), []),
     (T('Customer'), False, URL(c='customer', f='index'), []),
+    (T('Rimi Admin'), False, URL(c='admin', f='index'), []),
     (SPAN('Instructor'), False, URL(c='instructor'), [
         (T('View Week'), False, URL(c='instructor', f='view_leasons_week'), []),
         (T('View Day'), False, URL(c='instructor', f='view_leasons_day'), [])

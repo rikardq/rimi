@@ -11,7 +11,7 @@
     {{for rider in reg_riders:
         if rider not in canx_riders:}}
         <tr bgcolor="#669900">
-        <td>{{=rider["name"]}}</td>
+        <td>{{=rider["first_name"]}} {{=rider["last_name"]}}</td>
         <td>Reguljär ryttare</td>
         </tr>
         {{pass}}
@@ -21,7 +21,7 @@
 {{if num_rebooks > 0:}}
     {{for rider in rebook_riders:}}
         <tr bgcolor="#66FF99">
-        <td>{{=rider["name"]}}</td>
+        <td>{{=rider["first_name"]}} {{=rider["last_name"]}}</td>
         <td>Igenridning</td>
         </tr>
     {{pass}}
@@ -30,7 +30,7 @@
 {{if num_canx > 0:}}
     {{for rider in canx_riders:}}
         <tr bgcolor="#CC3300">
-        <td>{{=rider["name"]}}</td>
+        <td>{{=rider["first_name"]}} {{=rider["last_name"]}}</td>
         <td>Avbokat</td>
         </tr>
     {{pass}}

@@ -108,7 +108,7 @@ def view_leasons_week():
 
             display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":num_riders,"num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total,"this_date":this_date})
         except:
-            error.append("Unable to add data for record ",ldata.id) 
+            error.append("Unable to add data for record " + str(ldata.id)) 
 
     # Sort the entries, then dump the dict and return a list instead
     for day in display_week:
