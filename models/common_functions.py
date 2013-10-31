@@ -79,6 +79,19 @@ def get_black_dates():
             xleasons.append(entry["black_date"])
     return xleasons
 
+# Retrieve any administrator cancelled leasons for a leason_id:
+# Lets just do it regardless of date range, this table will be scarcely
+# populated and performance will not suffer...
+def canxbyadmin(thedate,leason_id):
+    q=(db.admin_cancelled_leason.id_leason==leason_id) & (db.admin_cancelled_leason.leason_date == thedate)
+    s=db(q).select(db.admin_cancelled_leason.leason_date)
+    if len(s) > 0:
+        return True
+    else:
+        return False
+
+    
+
 # A function to retrieve a date for the first weekday entry from start_date 
 # i.e if it is september 3rd, a tuesday today and our weekday is thursday
 # then return the date september 5th

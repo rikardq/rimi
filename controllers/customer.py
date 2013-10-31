@@ -147,24 +147,27 @@ def list_rebookings(customerid):
 
                     # Then check to see if there are any rebooked leasons for this date and leason
                     rebooked_leasons = len(db((db.rebooking.leason_date == first_leasondate) & (db.rebooking.id_leason == leason["leason_id"])).select(db.rebooking.id))
-                    # Then do
+                    # Then do the math for the available slots
                     available_rebooking_slots = leason["max_customers"] - rebooked_leasons + cancelled_leasons 
-                    # Append
-                    if len(db((db.rebooking.id_leason == leason["leason_id"]) & (db.rebooking.id_customer == cust_id) & (db.rebooking.leason_date == first_leasondate)).select()) == 1:
-                        json_leasons.append({
-                        "title":"Bokad igenridning",
-                        "url":"",
-                        "type":"rebooked",
-                        "date":str(leason_time_epoch),
-                        "description":"Du är inbokad på en igenridning. Status:?"  
-                        })
-                    else:
-                        json_leasons.append({
-                        "title":"Boka en igenridning",
-                        "url":URL('book_rebooking.html', args=[cust_id, leason["leason_id"], first_leasondate]),
-                        "type":"rebooking",
-                        "date":str(leason_time_epoch),
-                        "description":""})
+                    # One last check to make sure an instructor has not cancelled this leason and date
+                    if not canxbyadmin(first_leasondate,leason["leason_id" ]):
+                        # Since it is not, Append the leason as already booked leason if it is such 
+                        if len(db((db.rebooking.id_leason == leason["leason_id"]) & (db.rebooking.id_customer == cust_id) & (db.rebooking.leason_date == first_leasondate)).select()) == 1:
+                            json_leasons.append({
+                            "title":"Bokad igenridning",
+                            "url":"",
+                            "type":"rebooked",
+                            "date":str(leason_time_epoch),
+                            "description":"Du är inbokad på en igenridning. Status:?"  
+                            })
+                        # If it is not booked, append it as a bookable leason
+                        else:
+                            json_leasons.append({
+                            "title":"Boka en igenridning",
+                            "url":URL('book_rebooking.html', args=[cust_id, leason["leason_id"], first_leasondate]),
+                            "type":"rebooking",
+                            "date":str(leason_time_epoch),
+                            "description":""})
                 #    
                 #
                 first_leasondate = first_leasondate + timedelta(days=7)

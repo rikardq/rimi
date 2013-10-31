@@ -81,6 +81,13 @@ db.define_table("leasons",
       SQLField("id_customer", db.customer),
       SQLField("id_leason", db.leason))
 
+#Keeps track of administrator/instructor cancelled leasons, i.e leason
+# had to be cancelled by the riding school. 
+db.define_table("admin_cancelled_leason",
+      SQLField("id_leason", db.leason),
+      SQLField("leason_date", "date", notnull=True))
+
+
 
 
 # The history table which contains all historical leasons and their
@@ -183,3 +190,4 @@ db.leason.skill_level.requires=IS_IN_DB(db, 'skill_level.id', '%(skill_name)s')
 db.owner_of_leason.leason_id.requires=IS_IN_DB(db, "leason.id", '%(week_day)s %(leason_time)s')
 db.owner_of_leason.instructor_id.requires=IS_IN_DB(db, "instructor.id", 'Instruktör: %(name)s')
 db.customer.auth_user_id.requires=IS_IN_DB(db, "auth_user.id", '%(first_name)s %(last_name)s - %(email)s')
+db.admin_cancelled_leason.id_leason.requires=IS_IN_DB(db, "leason.id", '%(week_day)s %(leason_time)s')
