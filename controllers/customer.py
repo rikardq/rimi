@@ -272,41 +272,49 @@ def list_leasondates(customer):
 
             # The Present
             if leason_start_date == today:
-                # Do checks regarding today. I:E if there is a leason TODAY we must check the time. If it is 4 hours before leason
-                # starts they can cancel it. If it is less then that, they are screwed.
-                # function check_canx_time(leasonid) created ot check this, but it
-                # is not tested all the way yet
-                if check_canx_time(leason_data.id):
-                    # We have clearance to add this to a cancellable leason
+                # Test if the leason has been cancelled by admin
+                if canxbyadmin(leason_start_date,leason["leason_id"]):
                     leason_dates.append({
-                    "description":"",
-                    "title":"Avboka denna lektion",
-                    "url":URL('cancel_leason.html', args=[cust_id, leason["leason_id"], leason_start_date]),
-                    "type":"viewfuture",
-                    "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
-                    })
-                else: 
-                    # We have no clearance to cancel this leason. Display a class
-                    # indicating a leason must be cancelled within X hours before
-                    # the start of the leason
-                    leason_dates.append({
-                    "title":"En lektion måste avbokas minst 4 timmar innan lektionen börjar.",
-                    "description":"",
-                    "url":"",
-                    "type":"lastcall",
-                    "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
-                    })
+                        "description":"",
+                        "title":"Lektionen är inställd",
+                        "url":"",
+                        "type":"canxbyadmin",
+                        "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
+                        })
+                else:
+                    if check_canx_time(leason_data.id):
+                        # We have clearance to add this to a cancellable leason
+                        leason_dates.append({
+                        "description":"",
+                        "title":"Avboka denna lektion",
+                        "url":URL('cancel_leason.html', args=[cust_id, leason["leason_id"], leason_start_date]),
+                        "type":"viewfuture",
+                        "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
+                        })
+                    else: 
+                        # We have no clearance to cancel this leason. Display a class
+                        # indicating a leason must be cancelled within X hours before
+                        # the start of the leason
+                        leason_dates.append({
+                        "title":"En lektion måste avbokas minst 4 timmar innan lektionen börjar.",
+                        "description":"",
+                        "url":"",
+                        "type":"lastcall",
+                        "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
+                        })
 
                 # Must add another week to the variable so the function can keep rolling towards da FuTuRe
                 leason_start_date = leason_start_date + timedelta(days=7)
 
             # THe Future
             # La Futura consists of future "blank" dates, future rebookings and future cancelled leasons 
+            # and of leasons cancelled by admin/instrucotr
             if leason_start_date > today:
                 # Loop until we are at the end of the semester.
                 while leason_start_date <= end_date:
                     # We check to make sure it is not in black_dates 
                     if leason_start_date not in black_dates:
+                        # Check if its a cancelled leason
                         if leason_start_date in canx_leasons:
                             leason_dates.append({
                             "description":"",
@@ -314,6 +322,15 @@ def list_leasondates(customer):
                             "url":"",
                             "type":"cancelled",
                             "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))})
+                        # Check if its a leason cancelled by admin/instrucotr
+                        elif canxbyadmin(leason_start_date,leason_data.id):
+                            leason_dates.append({
+                            "description":"",
+                            "title":"Lektionen är inställd",
+                            "url":"",
+                            "type":"canxbyadmin",
+                            "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
+                            })
                         else:
                             leason_dates.append({
                             "description":"",
