@@ -332,8 +332,14 @@ def list_leasondates(customer):
                             "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
                             })
                         else:
+                            # Before appending, check if a reserved horse is perhaps stated for this leason,customer and date?
+                            horse_name = get_horse_info(leason_data.id,leason_start_date,cust_id)
+                            if horse_name is not None:
+                                descr = "Din häst: " + horse_name
+                            else:
+                                descr = ""
                             leason_dates.append({
-                            "description":"",
+                            "description":descr,
                             "title":"Avboka denna lektion",
                             "url":URL('cancel_leason.html', args=[cust_id, leason_data.id, leason_start_date]),
                             "type":"viewfuture",

@@ -183,12 +183,12 @@ def leason_info(this_date,leason_id):
     return num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time
 
 
-
-
-
-
-
-
-
-
+def get_horse_info(leason_id,leason_date,customer_id):
+    q = (db.reserved_horses.id_leason == leason_id) & (db.reserved_horses.id_customer == customer_id) & (db.reserved_horses.reserved_date == leason_date)
+    try:
+        horse_id = db(q).select(db.reserved_horses.id_horse)[0]["id_horse"]
+        horse_name = db(db.horse.id == horse_id).select(db.horse.name)[0]["name"]
+    except:
+        horse_name = None
+    return horse_name 
 
