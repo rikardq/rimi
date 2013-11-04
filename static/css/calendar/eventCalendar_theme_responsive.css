@@ -1,4 +1,8 @@
 /* Theme CSS */
+.weekNumber {
+  float: left;
+  padding: 2px 0 0 4px; }
+
 .eventCalendar-wrap {
   border: solid 1px #d3d3d3;
   box-shadow: 0 0 15px #999;

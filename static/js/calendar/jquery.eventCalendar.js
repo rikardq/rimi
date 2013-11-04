@@ -201,12 +201,15 @@
             }
             var calDate = new Date(year, month, dayCount);
             var weekNumber ='';
+            var weekNumberDiv = "";
             if(calDate.getDay() === 1) {
                 weekNumber = getWeekNumber(calDate)[1];
 
+                weekNumberDiv="<div class='weekNumber'>v." + weekNumber +"</div>";
             }
 
-            daysList.push('<li id="dayList_' + dayCount + '" rel="'+dayCount+'" class="eventsCalendar-day '+dayClass+'"><a href="#">' + dayCount + ' ' + weekNumber+  '</a></li>');
+
+            daysList.push('<li id="dayList_' + dayCount + '" rel="'+dayCount+'" class="eventsCalendar-day '+dayClass+'">'+ weekNumberDiv+'<a href="#">' + dayCount +'</a></li>');
         }
         $eventsCalendarDaysList.append(daysList.join(''));
 
@@ -273,7 +276,7 @@
         }
     }
 
-    function getEventsData(data, limit, year, month, day, direction){
+    function getEventsData(data, limit, year, month, day, direction) {
         directionLeftMove = "-=" + flags.directionLeftMove;
         eventContentHeight = "auto";
 
