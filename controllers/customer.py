@@ -10,10 +10,15 @@ from time import time
 #
 #
 #@auth.requires_login()
+
+
+def getcustomermessages(customerid):
+    return db(db.message_reference.to_id == customerid).select()
+
 def index():
     cust_id = 1
     helper = "Denna kalender visar dom lektionerna du rider. Du kan även se avbokade lektioner och dina igenridningar. För att boka av en lektion så väljer du det datum och lektion som du vill avboka, och tryck sedan Avboka lektion."
-    return dict(helper=helper,cust_id=cust_id)
+    return dict(helper=helper,cust_id=cust_id, messages=(getcustomermessages(cust_id)))
 
 def rebook():
     message = "Rebooking calendar is displayed here!"

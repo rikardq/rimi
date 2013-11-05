@@ -1,8 +1,18 @@
 {{extend 'layout.html'}}
-<h1>Lektioner för <b>{{=B(db.customer[cust_id]["first_name"])}} {{=B(db.customer[cust_id]["last_name"])}}  {{=(db.semester[retrieve_current_semester()[0]]["name"])}}
+<h3>Meddelanden</h3>
+<ul class="unstyled">
+{{for message in messages:}}
+    <li>
+        <span class="label label-info">Nytt!</span> <b>{{=message.message_id.subject}}</b>, {{=message.message_id.body}}
+    </li>{{pass}}
+</ul>
+<br>
+<br>
+<h1>Lektioner för <b>{{=B(db.customer[cust_id]["first_name"])}} {{=B(db.customer[cust_id]["last_name"])}}  {{=(db.semester[retrieve_current_semester()[0]]["name"])}}</b></h1>
 
 
-</h1>
+
+
 {{if db.customer[cust_id].credits > 0:}}
 Du har igenridningskrediter att spendera! <b>rebook calendar is <a href="rebook.html">here</a></b>
 {{pass}}
