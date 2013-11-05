@@ -220,11 +220,12 @@ def list_leasondates(customer):
 
     # Get the customers leasons as stored in the one-to-many table leasons
     try:
+        errormessage = ""
         leasons = db(db.leasons.id_customer==cust_id).select()
         for leason in leasons:
             leason_id = leason["id_leason"]
             # We need to retrieve the data for this leason from the leason table
-            leason_data = db(db.leason.id==leason["id_leason"]).select()[0]
+            leason_data = db(db.leason.id==leason_id).select()[0]
 
             # We must translate the spelled out weekday, i.e. "Måndag" to a numeric value (0 for Monday, 
             # 6 for Sunday to follow the convention that the timetuple wday uses. This is really gay
@@ -273,7 +274,7 @@ def list_leasondates(customer):
             # The Present
             if leason_start_date == today:
                 # Test if the leason has been cancelled by admin
-                if canxbyadmin(leason_start_date,leason["leason_id"]):
+                if canxbyadmin(leason_start_date,leason_id):
                     leason_dates.append({
                         "description":"",
                         "title":"Lektionen är inställd",
@@ -282,12 +283,20 @@ def list_leasondates(customer):
                         "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
                         })
                 else:
+                    # Get horse information for this leason if any 
+                    horse_name = get_horse_info(leason_data.id,leason_start_date,cust_id)
+                    if horse_name is not None:
+                        descr = "Din häst: " + horse_name
+                    else:
+                        descr = ""
+
+                    # Check if todays leason is too late to cancel
                     if check_canx_time(leason_data.id):
                         # We have clearance to add this to a cancellable leason
                         leason_dates.append({
-                        "description":"",
+                        "description":descr,
                         "title":"Avboka denna lektion",
-                        "url":URL('cancel_leason.html', args=[cust_id, leason["leason_id"], leason_start_date]),
+                        "url":URL('cancel_leason.html', args=[cust_id, leason_id, leason_start_date]),
                         "type":"viewfuture",
                         "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
                         })
@@ -297,7 +306,7 @@ def list_leasondates(customer):
                         # the start of the leason
                         leason_dates.append({
                         "title":"En lektion måste avbokas minst 4 timmar innan lektionen börjar.",
-                        "description":"",
+                        "description":descr,
                         "url":"",
                         "type":"lastcall",
                         "date":str(convert_dt_to_epoch(leason_start_date,leason_data.leason_time))
