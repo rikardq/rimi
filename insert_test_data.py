@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
+
 db.admin_settings.insert(variable_name="max_rebook_days",variable_value=28,description="Sets the max number of days forward an enduser can see rebookable dates")
 db.admin_settings.insert(variable_name="active_semester",variable_value=1,description="Stores the active semester, changed by user")
 db.admin_settings.insert(variable_name="hours_before_canx",variable_value=4,description="Set the time 4 hours before the leason beginsit is cancellable. ")
@@ -50,5 +52,10 @@ db.horse.insert(name="Sandra",status="Aktiv",horse_type="Ponny")
 db.reserved_horses.insert(id_customer=1,id_horse=2,id_leason=4,reserved_date="2013-10-31")
 db.reserved_horses.insert(id_customer=1,id_horse=1,id_leason=4,reserved_date="2013-11-14")
 
+db.messages.insert(subject="Ny ponny", body="Nu har vi fått en ny ponny som heter Stina i stallet", created=datetime.now())
+db.messages.insert(subject="Junior tävling", body="Söndagen den 5 januari 2014 har vi tävling i junior hoppning kom gärna och titta.", created=datetime.now())
+
+db.message_reference.insert(message_id=1, to_id=1, from_id=2, end_date=datetime.now())
+db.message_reference.insert(message_id=2, to_id=1, from_id=2, end_date=datetime.now())
 
 db.commit()
