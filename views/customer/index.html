@@ -1,28 +1,46 @@
 {{extend 'layout.html'}}
-<h3>Meddelanden</h3>
-<ul class="unstyled">
-{{for message in messages:}}
-    <li>
-        <span class="label label-info">Nytt!</span> <b>{{=message.message_id.subject}}</b>, {{=message.message_id.body}}
-    </li>{{pass}}
-</ul>
-<br>
-<br>
-<h1>Lektioner för <b>{{=B(db.customer[cust_id]["first_name"])}} {{=B(db.customer[cust_id]["last_name"])}}  {{=(db.semester[retrieve_current_semester()[0]]["name"])}}</b></h1>
+<div class="row-fluid">
+    <div class="span4 offset1"><h3>Meddelanden</h3></div>
+    <div class="span6 offset1">
+        <ul class="unstyled">
+            {{for message in messages:}}
+            <li>
+                <span class="label label-info">Nytt!</span> <b>{{=message.message_id.subject}}</b>,
+                {{=message.message_id.body}}
+            </li>
+            {{pass}}
+        </ul>
+    </div>
+</div>
 
 
+<div class="row-fluid">
+    <div class="span8"><h1>Lektioner för <b>{{=B(db.customer[cust_id]["first_name"])}}
+        {{=B(db.customer[cust_id]["last_name"])}}
+    </b></h1>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span8"><h1>
+        {{=(db.semester[retrieve_current_semester()[0]]["name"])}}</h1>
+    </div>
+</div>
 
 
-{{if db.customer[cust_id].credits > 0:}}
-Du har igenridningskrediter att spendera! <b>rebook calendar is <a href="rebook.html">here</a></b>
-{{pass}}
+<div class="row-fluid">
+    <div class="span10">{{if db.customer[cust_id].credits > 0:}}
+        Du har igenridningskrediter att spendera! <b>rebook calendar is <a href="rebook.html">here</a></b>
+        {{pass}}
+
+    </div>
+</div>
 
 
 <div class="container" id="calendar">
     <div class="row">
         <div id="eventCalendarDefault"></div>
         <script>
-            $(document).ready(function() {
+            $(document).ready(function () {
                 $("#eventCalendarDefault").eventCalendar({
                     txt_NextEvents: 'Next events showing up to four.',
                     eventsLimit: 4,
