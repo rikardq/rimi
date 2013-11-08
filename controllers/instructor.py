@@ -99,16 +99,16 @@ def view_leasons_week():
 
     # Go through the leasons and place them into appropriate spot in week dict
     for leason in leasons:
-        try:
-            ldata = db(db.leason.id==leason.leason_id).select()[0]
-            # this leasons date in this view
-            this_date = datez[ldata.week_day]
-            # Use internal function to retrieve statistics and rider details(rider details will not be used here)
-            num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(this_date,ldata.id)
-
+        ldata = db(db.leason.id==leason.leason_id).select()[0]
+        # this leasons date in this view
+        this_date = datez[ldata.week_day]
+        # Use internal function to retrieve statistics and rider details(rider details will not be used here)
+        num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(this_date,ldata.id)
+        # Mark record if it has been cancelled by admin
+        if len(db((db.admin_cancelled_leason.id_leason==ldata.id) & (db.admin_cancelled_leason.leason_date==(this_date))).select()) != 0: 
+            display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":"Avbokad","num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total,"this_date":this_date})
+        else:
             display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":num_riders,"num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total,"this_date":this_date})
-        except:
-            error.append("Unable to add data for record " + str(ldata.id)) 
 
     # Sort the entries, then dump the dict and return a list instead
     for day in display_week:
