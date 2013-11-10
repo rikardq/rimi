@@ -162,6 +162,7 @@ def alter_credit(what,who,howmuch):
 # to retrieve up-to-date info on a leason
 
 def leason_info(this_date,leason_id):
+    # Remember that the dataset returned in rebook, canx and reg riders must be the same as they are compared row to row in the view
     leason_time = db(db.leason.id==leason_id).select(db.leason.leason_time)[0]["leason_time"]
     num_riders = db((db.leasons.id_leason==leason_id)&(db.customer.id==db.leasons.id_customer)&(db.customer.status=="Active")).count()
     num_rebooks = db((db.rebooking.id_leason==leason_id) & (db.rebooking.approval=="yes") & (db.rebooking.leason_date==this_date)).count()
@@ -169,16 +170,16 @@ def leason_info(this_date,leason_id):
     num_total= num_riders - num_canx + num_rebooks
     reg_riders = db((db.leasons.id_leason==leason_id)&
         (db.customer.id==db.leasons.id_customer)&
-        (db.customer.status=="Active")).select(db.customer.first_name,db.customer.last_name)
+        (db.customer.status=="Active")).select(db.customer.id,db.customer.first_name,db.customer.last_name)
 
     canx_riders = db((db.cancelled_leasons.id_leason==leason_id) &
         (db.cancelled_leasons.cancelled_date==this_date) & 
-        (db.customer.id==db.cancelled_leasons.id_customer)).select(db.customer.first_name,db.customer.last_name)
+        (db.customer.id==db.cancelled_leasons.id_customer)).select(db.customer.id,db.customer.first_name,db.customer.last_name)
 
     rebook_riders = db((db.rebooking.id_leason==leason_id) & 
         (db.rebooking.approval=="yes") & 
         (db.rebooking.leason_date==this_date) & 
-        (db.customer.id==db.rebooking.id_customer)).select(db.customer.first_name,db.customer.last_name)
+        (db.customer.id==db.rebooking.id_customer)).select(db.customer.id,db.customer.first_name,db.customer.last_name)
 
     return num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time
 
