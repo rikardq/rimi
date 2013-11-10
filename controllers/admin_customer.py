@@ -16,10 +16,11 @@ def add():
 
     # Step 1, name and such
     if step == 1:
+        session.wizard = {}
         form = SQLFORM.factory(*[db.customer.first_name,db.customer.last_name,db.customer.status])
     if step == 2:
         form = ""
-        choice = P(helper_rideraccount) +  A("Nytt användarkonto",_href=URL(args=[3,"new"])) + BR() + A("Lägg till under existerande andvändarkonto",_href=URL(args=[3,"already"])) 
+        choice = P(helper_rideraccount) +  A("Nytt användarkonto",callback=URL(args=[3,"new"]), target="content") + BR() + A("Lägg till under existerande andvändarkonto",_href=URL(args=[3,"already"])) 
     if step == 3:
         switch = request.args(1)
         if switch == "new":
@@ -29,7 +30,7 @@ def add():
                     last_name=session.wizard["last_name"],
                     email=form.vars.email)
                 session.wizard["auth_user_id"] = new_authid["id"]
-                redirect(URL(args=step+1))
+                redirect(URL(args=[4]))
         if switch == "already":
             form = SQLFORM.factory(db.customer.auth_user_id)
             if form.process().accepted:
@@ -40,7 +41,7 @@ def add():
         form = session.wizard 
         db.customer.insert(**session.wizard)
         session.flash = T("Wizard CompleteZ")
-        redirect(URL())
+        redirect(URL(args=1))
 
     if step < 2: 
         if form.accepts(request,session):
