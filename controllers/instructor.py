@@ -44,7 +44,12 @@ def view_leasons_day():
         leason_id = leason["leason_id"]
         if db(db.leason.id==leason_id).select(db.leason.week_day)[0]["week_day"] == thisweekday:
             num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(thisdate,leason_id)
-            leason_data.append([str(leason_time)[:5],num_riders,num_total,num_rebooks,num_canx,leason_id])
+
+            # Check if cancelled
+            if len(db((db.admin_cancelled_leason.id_leason==leason_id) & (db.admin_cancelled_leason.leason_date==(thisdate))).select()) != 0:
+                leason_data.append([str(leason_time)[:5],"Avbokad",num_total,num_rebooks,num_canx,leason_id])
+            else:
+                leason_data.append([str(leason_time)[:5],num_riders,num_total,num_rebooks,num_canx,leason_id])
             
 
         

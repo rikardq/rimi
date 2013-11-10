@@ -27,12 +27,32 @@
         {{if len(display_week2[wday]) > 0:}}
             <table>
             <tr> 
+                <td>
+                <B>T</B> 
+                </td>
+                <td> 
+                <B>#</B> 
+                </td>
+                <td> 
+                <B>I</B> 
+                </td>
+                <td> 
+                <B>A</B> 
+                </td>
+            </tr>
             {{for entry in display_week2[wday]:}}
+            <tr>
                 <td> 
                 {{=entry[0]}} 
                 </td>
                 <td> 
-                {{=entry[1]}} 
+                {{=entry[2]}} 
+                </td>
+                <td>
+                {{=entry[3]}} 
+                </td>
+                <td>
+                {{=entry[4]}} 
                 </td>
             </tr>
             {{pass}}
@@ -45,4 +65,3 @@
 </tr>
 </table>
 </div>
-

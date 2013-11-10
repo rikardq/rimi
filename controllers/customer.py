@@ -421,7 +421,7 @@ def book_rebooking():
     return dict(form=form, helper=helper)
 
 def cancel_leason():
-    # The function to cancel a leason. This URL is created in list_leasondates function. The user id is for now passed here as a request.args but should obviously be migrated into the greater auth scheme
+    # The function to cancel a leason. This URL is created in list_leasondates function. The user id is for now passed here as a request.args but should obviously be migrated into the greater auth scheme. However, an allowance should be made for an instructor to be able to cancel a customers leason for them.
     cust_id = request.args(0)
     leason_id = request.args(1)
     leason_date = request.args(2)
