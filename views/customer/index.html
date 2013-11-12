@@ -1,7 +1,23 @@
-{{extend 'layout.html'}}
-<div class="row-fluid widget-box">
-    <div class="span2 "><h3>Meddelanden</h3></div>
-    <div class="span8">
+{{extend 'customer/customer_layout.html'}}
+  <header class="mastheader row" id="header">
+      {{if response.title:}}
+        <div class="span8">
+            <div class="page-header">
+                <h1>
+                   Välkommen {{=B(db.customer[cust_id]["first_name"])}}
+                    <small>{{=response.subtitle or ''}}</small>
+                </h1>
+            </div>
+        </div>
+       <div class="span4">{{if db.customer[cust_id].credits > 0:}}
+        Du har igenridningskrediter att spendera! <b><a href="rebook.html">boka om här</a></b>
+        {{pass}}
+    </div>
+	{{pass}}
+    </header>
+<div class="row-fluid widget-box span3">
+    <div class="span3 "><h3>Meddelanden</h3></div>
+    <div class="span3">
         <ul class="unstyled">
             {{for message in messages:}}
             <li>
@@ -14,31 +30,15 @@
 </div>
 
 
-<div class="row-fluid">
-    <div class="span8"><h1>Lektioner för <b>{{=B(db.customer[cust_id]["first_name"])}}
-        {{=B(db.customer[cust_id]["last_name"])}}
-    </b></h1>
-    </div>
-</div>
-<div class="row-fluid">
-    <div class="span8"><h1>
-        {{=(db.semester[retrieve_current_semester()[0]]["name"])}}</h1>
-    </div>
-</div>
-
+<div class="container row-widget" id="calendar">
 
 <div class="row-fluid">
-    <div class="span10">{{if db.customer[cust_id].credits > 0:}}
-        Du har igenridningskrediter att spendera! <b>rebook calendar is <a href="rebook.html">here</a></b>
-        {{pass}}
-
+    <div class="span8"><h3>Dina lektioner för <b>  {{=(db.semester[retrieve_current_semester()[0]]["name"])}}
+    </b></h3>
     </div>
 </div>
-
-
-<div class="container" id="calendar">
     <div class="row">
-        <div id="eventCalendarDefault"></div>
+        <div id="eventCalendarDefault" class=""></div>
         <script>
             $(document).ready(function () {
                 $("#eventCalendarDefault").eventCalendar({
