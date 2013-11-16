@@ -238,9 +238,16 @@ def list_leasondates(customer):
             # feature.
             leason_weekday = reverse_translate_weekday(leason_data.week_day)
 
+            # IF it is time limited, then set start and end date from values in db, else
             # Call internal function to get the first available DATE for the leasons Weekday
             # counting from today
-            leason_start_date = get_firstdate_weekday(leason_weekday, start_date)
+            try:
+                a=db((db.leason.id==leason_id)&(db.leason.limited=="Ja")).select(db.leason.start_date,db.leason.end_date)[0]
+                leason_start_date = a.start_date
+                end_date = a.end_date
+            except:
+                leason_start_date = get_firstdate_weekday(leason_weekday, start_date)
+                end_date = semester_info.end_date
 
             #This is a list for keeping the dates for this leason
             leason_dates = []

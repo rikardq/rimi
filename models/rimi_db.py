@@ -66,6 +66,9 @@ db.define_table("semester",
 
 
 #A leason is created in this table. It is tied to a skill level.
+# The limited field defines if this leason is limited by date rather then the whole semester,
+# the start and end dates are entered in by default on all leasons, to make the comparisons in
+# various functions easier. 
 db.define_table("leason",
       SQLField("week_day", requires=IS_IN_SET(['Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag','Söndag']), label="Veckodag" ),
       SQLField("leason_time", "time", label="Lektionen startar", notnull=True, default=None),
@@ -73,6 +76,9 @@ db.define_table("leason",
       SQLField("max_customers", "integer", label="Max ryttare i gruppen", notnull=True, default=None),
       SQLField("skill_level", db.skill_level, label="Nivå", notnull=True),
       SQLField("status", "string", requires=IS_IN_SET(['Aktiv','Inaktiv']), default='Aktiv'),
+      SQLField("limited", "string", label="Är lektionen tidsbegränsad?",requires=IS_IN_SET(['Ja','Nej']), default='Nej'),
+      SQLField("start_date", "date", label="Vilket datum börjar lektionen?", default=date.today()),
+      SQLField("end_date", "date", label="Vilket datum slutar lektionen?",  default=date.today()),
       SQLField("leason_type", "string", label="Lektionstyp", requires=IS_IN_SET(['Ponny','Häst','Blandad'])))
 
 

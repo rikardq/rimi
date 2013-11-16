@@ -42,14 +42,17 @@ def view_leasons_day():
     # See what leasons matches this weekday for this instructor
     for leason in leasons:
         leason_id = leason["leason_id"]
+        ldata = db(db.leason.id==leason.leason_id).select()[0]
         if db(db.leason.id==leason_id).select(db.leason.week_day)[0]["week_day"] == thisweekday:
-            num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(thisdate,leason_id)
+            # Check if this is a time limited leason and if this date we are viewing is in the range
+            if (ldata.limited == "Ja") & (thisdate >=ldata.start_date) & (thisdate <= ldata.end_date) or (ldata.limited == "Nej"):
+                num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(thisdate,leason_id)
 
-            # Check if cancelled
-            if len(db((db.admin_cancelled_leason.id_leason==leason_id) & (db.admin_cancelled_leason.leason_date==(thisdate))).select()) != 0:
-                leason_data.append([str(leason_time)[:5],"Avbokad",num_total,num_rebooks,num_canx,leason_id])
-            else:
-                leason_data.append([str(leason_time)[:5],num_riders,num_total,num_rebooks,num_canx,leason_id])
+                # Check if cancelled
+                if len(db((db.admin_cancelled_leason.id_leason==leason_id) & (db.admin_cancelled_leason.leason_date==(thisdate))).select()) != 0:
+                    leason_data.append([str(leason_time)[:5],"Avbokad",num_total,num_rebooks,num_canx,leason_id])
+                else:
+                    leason_data.append([str(leason_time)[:5],num_riders,num_total,num_rebooks,num_canx,leason_id])
             
 
         
@@ -107,13 +110,15 @@ def view_leasons_week():
         ldata = db(db.leason.id==leason.leason_id).select()[0]
         # this leasons date in this view
         this_date = datez[ldata.week_day]
-        # Use internal function to retrieve statistics and rider details(rider details will not be used here)
-        num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(this_date,ldata.id)
-        # Mark record if it has been cancelled by admin
-        if len(db((db.admin_cancelled_leason.id_leason==ldata.id) & (db.admin_cancelled_leason.leason_date==(this_date))).select()) != 0: 
-            display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":"Avbokad","num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total,"this_date":this_date})
-        else:
-            display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":num_riders,"num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total,"this_date":this_date})
+        # Check to see if it is a date limited leason, if so only add view if the date is within the range
+        if (ldata.limited == "Ja") & (this_date >=ldata.start_date) & (this_date <= ldata.end_date) or (ldata.limited == "Nej"):
+            # Use internal function to retrieve statistics and rider details(rider details will not be used here)
+            num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(this_date,ldata.id)
+            # Mark record if it has been cancelled by admin
+            if len(db((db.admin_cancelled_leason.id_leason==ldata.id) & (db.admin_cancelled_leason.leason_date==(this_date))).select()) != 0: 
+                display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":"Avbokad","num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total,"this_date":this_date})
+            else:
+                display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":num_riders,"num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total,"this_date":this_date})
 
     # Sort the entries, then dump the dict and return a list instead
     for day in display_week:
