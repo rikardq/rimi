@@ -398,7 +398,7 @@ def list_leasondates(customer):
         "date":str(convert_dt_to_epoch(rebooked_leason["leason_date"],rb_ltime)),"description":"Du har bokat en igenridning"})
 
 
-
+    # If the newmaster is empty, add one entry so as to not break calendar
     if len(newmaster) < 1:
         newmaster.append({"description":"ASSA","title":"empty","url":"empty","type":"empty","date":"1381766400000"})
 

@@ -6,6 +6,10 @@
         {{=A('Ny Kund', callback=URL('add'), target="content")}}
       </div>
       <div class="span10" id="content">
+
+       {{=crud.select(db.auth_user, fields=["first_name","last_name","email"])}}
+
+
         <!--Body content-->
       </div>
   </div>

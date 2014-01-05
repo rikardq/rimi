@@ -20,7 +20,7 @@ def add():
         form = SQLFORM.factory(*[db.customer.first_name,db.customer.last_name,db.customer.status])
     if step == 2:
         form = ""
-        choice = P(helper_rideraccount) +  A("Nytt användarkonto",callback=URL(args=[3,"new"]), target="content") + BR() + A("Lägg till under existerande andvändarkonto",_href=URL(args=[3,"already"])) 
+        choice = P(helper_rideraccount) +  A("Nytt användarkonto",callback=URL(args=[3,"new"]), target="content") + BR() + A("Lägg till under existerande andvändarkonto",callback=URL(args=[3,"already"]), target="content") 
     if step == 3:
         switch = request.args(1)
         if switch == "new":
@@ -32,6 +32,7 @@ def add():
                 session.wizard["auth_user_id"] = new_authid["id"]
                 redirect(URL(args=[4]))
         if switch == "already":
+            # This should get a typeahead feature on it so we do not be stuck with ugly dropdown
             form = SQLFORM.factory(db.customer.auth_user_id)
             if form.process().accepted:
                 session.wizard.update(form.vars)

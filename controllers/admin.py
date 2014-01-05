@@ -43,3 +43,5 @@ def blackdates():
     blackdates = crud.select(db.black_dates, fields=["black_date"])
     return dict(form=form,blackdates=blackdates)
 
+def adminsettings():
+    return dict(form="W")
