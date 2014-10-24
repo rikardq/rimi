@@ -1,48 +1,44 @@
 # -*- coding: utf-8 -*-
-# try something like
-def index(): 
-  from datetime import time
-  from datetime import timedelta
 
-  datelist = []
-  displaylist = []
-  dayz = ['Mån','Tis','Ons','Tors','Fre','Lör','Sön']
+# Used to sort lists
+from operator import itemgetter
 
-  end_date = date(2014,12,24)
-  today = date.today()
-  while today < end_date:
-    datelist.append(today)
-    displaylist.append({'Weekday': dayz[today.weekday()] + 'dag', 'Date': str(today)})
-    today = today + timedelta(days=2)
+##### GLOBAL VARIABLES START 
+#
+# Lets get the active semester(function in model)
+active_semester = retrieve_current_semester()[0]
 
+# And retrieve a list of the black dates 
+black_dates = get_black_dates()
 
+# Get start and end dates for the active semester
+semester_info = db(db.semester.id==active_semester).select()[0]
+start_date = semester_info.start_date
+end_date = semester_info.end_date
+today=date.today()
 
-  return dict(leasons=list_leasondates(1),displaylist=displaylist,datelist=datelist,message=datelist)
+# If this value is not set in the admin_settings table, use default below
+max_rebook_days = 31
+#
+##### END
+
+def view(): 
+
+  #return dict(leasons=list_leasondates(1),displaylist=displaylist,datelist=datelist,message=datelist)
+  return dict(leasons=list_leasondates(1), rebookings=list_rebookings(1))
+
+def rebook():
+  return dict(rebookings=list_rebookings(1))
 
 
 def list_leasondates(customer):
     '''
     '''
-    # Lets get the active semester(function in model)
-    active_semester = retrieve_current_semester()[0]
-
-    # And retrieve a list of the black dates 
-    black_dates = get_black_dates()
-
     # The cust_id is the first argument in calling this function
     # But this is really bad. Uberbad. Do not do this. Query the database for the currently
     # logged in users user_id variable directly instead.
     #cust_id = request.args(0)
     cust_id = customer
-
-    # Get start and end dates for the active semester
-    semester_info = db(db.semester.id==active_semester).select()[0]
-    start_date = semester_info.start_date
-    end_date = semester_info.end_date
-
-    # We also need ot know todays date, in datetime.date format to stay consistent.
-    #today=date(year=datetime.now().year,month=datetime.now().month,day=datetime.now().day)
-    today=date.today()
 
     # Here we will hold all leason data that will eventually be returned as json
     master_leasons = []
@@ -79,7 +75,8 @@ def list_leasondates(customer):
             #
             # We will use these lists to search through when we loop
             canx_leasons = get_cancelled_leasons(cust_id,leason_id)
-            historical_leasons = get_leason_history(cust_id,leason_id)
+
+            #historical_leasons = get_leason_history(cust_id,leason_id)
             rebooked_leasons = get_rebooked_leasons(cust_id)
 
             # The Past, The Present and The Future
@@ -221,7 +218,114 @@ def list_leasondates(customer):
         })
 
     # Try to sort this mess by date
-    from operator import itemgetter
     finalmaster= sorted(newmaster, key=itemgetter('date')) 
 
     return (finalmaster)
+
+def list_rebookings(customer):
+    # But this is really bad. Uberbad. Do not do this. Query the database for the currently
+    # logged in users user_id variable directly instead.
+    cust_id = customer 
+    #Aquire customers skill level
+    # At the same time, generate a list of the customers leasons ID. this will be used later to 
+    # exclude the customers own leasons, since they are not available for rebookings.
+    customer_leasons = []
+    # Create a default variable skill_level
+    skill_level = 0
+
+    # See if the customer has any leasons assigned
+    res = db(db.leasons.id_customer==cust_id).select(db.leasons.id_leason)
+    # While we have this data , generate a list of the customers leasons ID. this will be used later to 
+    # exclude the customers own leasons, since they are not available for rebookings.
+    for row in res:
+        customer_leasons.append(row.id_leason)
+
+    # Defining the query here, not running it yet.
+    # Select the customer from leasons, the leasons from leason and the skill_level from skill_Level....!
+    q = (db.leasons.id_customer==cust_id)&(db.leasons.id_leason==db.leason.id)&(db.leason.skill_level==db.skill_level.id)
+    try:
+        # Try selecting all the skill points from the leasons this customer is associated with. Do a 
+        # reverse order(note the tilde after orderby=) and select skill level as the first entry, which 
+        # will be the highest
+        rows = db(q).select(db.skill_level.skill_point,orderby=~db.skill_level.skill_point)
+        if len(rows) > 0:
+             skill_level = int(rows[0]["skill_point"])
+    except:
+       #Something did not work, set skill level to 0
+       skill_level = 0
+
+    # Attempt to get the max_rebook_days variable from the admin_settings table. IF it is not set, use the default of 31
+    # (that is defined in the global at the top)
+    try:
+        q = db(db.admin_settings.variable_name=="max_rebook_days").select()[0]
+        max_rebook_days = int(q.variable_value)
+    except:
+        max_rebook_days = max_rebook_days 
+
+    # Now we can create the stop_date
+    stop_date = today + timedelta(days=max_rebook_days)
+
+
+    #Loop through the weekdays, lookin in the tables for suitable leasons that could perhaps offer some
+    # rerides.
+    iterweekday = 0 # This represents monday, for our loop.
+    leasons = []
+    while iterweekday < 7:
+        # Translate the weekday FROM num TO swedish for db query
+        weekday = translate_weekday(iterweekday)
+
+        # Get a lists of leasons for todays weekday, based on the customers skill_level
+        q = (db.leason.week_day==weekday)&(db.leason.skill_level==db.skill_level.id)&(db.skill_level.skill_point <= skill_level)
+        rows = db(q).select(db.leason.max_customers,db.leason.id,db.leason.leason_time,db.leason.week_day,db.leason.leason_time)
+
+        for row in rows:
+            max_customers = row.max_customers 
+            leason_id = row.id
+            leason_time = row.leason_time 
+            week_day = row.week_day 
+            leason_time = row.leason_time 
+
+            # if statement to make sure we do not select leasons the customer already rides regurarly in
+            if leason_id not in customer_leasons:
+                try:
+                    customers_in_leason = len(db(db.leasons.id_leason==leason_id).select())
+                except:
+                    customers_in_leason = 0
+                leasons.append({"weekday":weekday,"week_day":week_day,"leason_id":leason_id,"customers_in_leason":customers_in_leason,"max_customers":max_customers,"leason_time":leason_time})
+        iterweekday = iterweekday + 1
+
+    # leason_max_riders - customers_who_ride - rerides + cancellations = Available rebookable slots
+    # Since all data is now gathered, lets look inside the leasons list and go through each leason
+    # and generate a new list with available reride opportunities
+    reride_slots = []
+    for leason in leasons:
+        # Translate the literal swedish weekday to a numeric one 
+        weekday = reverse_translate_weekday(leason["weekday"])
+        # What is the first date for this weekday, counting from today?
+        first_leasondate = get_firstdate_weekday(weekday, today)
+        # Now we have our starting point, and will loop through it until we hit the stop_date 
+        # FOR each date available for this leason, check each leason for canx, rerides etc to get the FUUUUCK
+        while first_leasondate <= stop_date:
+            if first_leasondate not in black_dates:
+                # Now check to see if there are any cancelled leasons for this date and leason
+                cancelled_leasons = len(db((db.cancelled_leasons.cancelled_date == first_leasondate) & (db.cancelled_leasons.id_leason == leason["leason_id"])).select(db.cancelled_leasons.id))
+
+                # Then check to see if there are any rebooked leasons for this date and leason
+                rebooked_leasons = len(db((db.rebooking.leason_date == first_leasondate) & (db.rebooking.id_leason == leason["leason_id"])).select(db.rebooking.id))
+                # Then do the math for the available slots
+                available_rebooking_slots = leason["max_customers"] - rebooked_leasons + cancelled_leasons 
+                # NO add if the leason/date combo has been canx by admin
+                if not canxbyadmin(first_leasondate,leason["leason_id" ]):
+                    # NO add if the customer is already booked for a reride on leason/date combo 
+                    if len(db((db.rebooking.id_leason == leason["leason_id"]) & (db.rebooking.id_customer == cust_id) & (db.rebooking.leason_date == first_leasondate)).select()) != 1:
+                        reride_slots.append({
+                            "date":first_leasondate,
+                            "weekday":leason["weekday"],
+                            "time":leason["leason_time"],
+                            })
+            first_leasondate = first_leasondate + timedelta(days=7)
+
+    final_rerides = sorted(reride_slots, key=itemgetter('date')) 
+    return (final_rerides)
+
+

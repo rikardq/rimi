@@ -2,23 +2,20 @@
 
 <!-- PRICING SECTION -->
       <div class="container">
+        <h4>Boka en igenridning</h4>
+                <small><a href="{{=URL('view')}}">Titta på dina fina lektioner</a></small>
                <div class="pricing-option">
                    <div class="pricing-top top">
-                      {{for leason in leasons:}}
+                      {{for rebooking in rebookings:}}
                       <div>
                          <span class="pricing-edition">
-                            {{=leason['title']}} 
-                         </span>
-                         <span class="pricing-edition">
-                            {{if leason['horse'] != "":}}
-                            Din häst: {{=leason['horse']}} 
-                            {{pass}}
+                            Boka igenridning
                          </span>
                          <span class="price">
                             <span class="price-amount">
-                               {{=leason['weekday']}} - {{=str(leason['time'])[:5]}}
+                               {{=rebooking['weekday']}} - {{=str(rebooking['time'])[:5]}}
                             </span>
-                            <br><br><small>{{=leason['date']}}</small>
+                            <br><br><small>{{=rebooking['date']}}</small>
                          </span>
                       </div>
                       {{pass}}
@@ -27,12 +24,11 @@
       </div><!-- container -->
 
 
-
                 <section id="features" class="blue">
                         <div class="content">
 				<div class="center">
-{{for leason in leasons:}}
-					<div><h3>{{=leason['date']}}</h3></div>
+{{for rebooking in rebookings:}}
+					<div><h3>{{=rebooking['date']}}</h3></div>
 {{pass}}
 				</div>
 			</div>
@@ -58,8 +54,4 @@ $('.center').slick({
 });
 
 </script>
-
-
-
-
 

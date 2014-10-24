@@ -1,0 +1,69 @@
+{{extend 'layout-test.html'}}
+
+<!-- PRICING SECTION -->
+      <div class="container">
+        <h4>Titta på dina lektioner o bokade igenridningar</h4>
+                <small><a href="{{=URL('rebook')}}">Boka en igenridning</a></small>
+               <div class="pricing-option">
+                   <div class="pricing-top top">
+                      {{for leason in leasons:}}
+                      <div>
+                         <span class="pricing-edition">
+                            {{=leason['title']}} 
+                         </span>
+                         <span class="pricing-edition">
+                            {{if leason['horse'] != "":}}
+                            Din häst: {{=leason['horse']}} 
+                            {{pass}}
+                         </span>
+                         <span class="price">
+                            <span class="price-amount">
+                               {{=leason['weekday']}} - {{=str(leason['time'])[:5]}}
+                            </span>
+                            <br><br><small>{{=leason['date']}}</small>
+                         </span>
+                      </div>
+                      {{pass}}
+                   </div> <!-- pricing-top -->
+               </div><!-- /pricing-option -->
+      </div><!-- container -->
+
+
+
+                <section id="features" class="blue">
+                        <div class="content">
+				<div class="center">
+{{for leason in leasons:}}
+					<div><h3>{{=leason['date']}}</h3></div>
+{{pass}}
+				</div>
+			</div>
+		</section>
+
+    <script type="text/javascript">
+$('.top').slick({
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: false,
+    fade: true,
+    asNavFor: '.center'
+});
+
+
+$('.center').slick({
+  centerMode: true,
+  centerPadding: '60px',
+  slidesToShow: 3,
+  asNavFor: '.top',
+  variableWidth: true,
+  focusOnSelect: true
+});
+
+</script>
+
+{{for rebooking in rebookings:}}
+    <br>
+    {{=rebooking['weekday']}} - {{=rebooking['date']}} - kl: {{=str(rebooking['time'])[:5]}}
+{{pass}}
+
+
