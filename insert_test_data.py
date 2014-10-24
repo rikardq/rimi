@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+
 from datetime import datetime
 
 db.admin_settings.insert(variable_name="max_rebook_days",variable_value=28,description="Sets the max number of days forward an enduser can see rebookable dates")
 db.admin_settings.insert(variable_name="active_semester",variable_value=2,description="Stores the active semester, changed by user")
 db.admin_settings.insert(variable_name="hours_before_canx",variable_value=4,description="Set the time 4 hours before the leason beginsit is cancellable. ")
 db.semester.insert(name="Hostterminen 2013",start_date="2013-08-12",end_date="2013-12-22")
-db.semester.insert(name="Hostterminen 2013",start_date="2013-01-02",end_date="2014-06-19")
+db.semester.insert(name="Hostterminen 2014",start_date="2014-08-04",end_date="2014-12-22")
 db.skill_level.insert(skill_name="Nivå 1",skill_point=1,skill_type="Ponny")
 db.skill_level.insert(skill_name="Nivå 2",skill_point=2,skill_type="Ponny")
 db.leason.insert(week_day="Måndag",leason_time="18:00:00",leason_length=60,max_customers=6, skill_level=1,status="Active",leason_type="Ponny")

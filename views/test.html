@@ -1,0 +1,44 @@
+{{extend 'layout.html'}}
+<h1>This is the test.html template</h1>
+
+				<div class="slider slider-for">
+					<div><h3>1</h3></div>
+					<div><h3>2</h3></div>
+					<div><h3>3</h3></div>
+					<div><h3>4</h3></div>
+					<div><h3>5</h3></div>
+				</div>
+				<div class="slider slider-nav">
+					<div><h3>1</h3></div>
+					<div><h3>2</h3></div>
+					<div><h3>3</h3></div>
+					<div><h3>4</h3></div>
+					<div><h3>5</h3></div>
+					</div>
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script type="text/javascript" src="slick/slick.min.js"></script>
+
+    <script type="text/javascript">
+         $('.slider-for').slick({
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            arrows: false,
+            fade: true,
+            asNavFor: '.slider-nav'
+        });
+        $('.slider-nav').slick({
+            slidesToShow: 3,
+            slidesToScroll: 1,
+            asNavFor: '.slider-for',
+            dots: true,
+            centerMode: true,
+            focusOnSelect: true
+        });
+</script>
+
+
+
+
+
+{{=BEAUTIFY(response._vars)}}
