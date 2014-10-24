@@ -1,51 +1,30 @@
-{{extend 'layout-slick.html'}}
+{{extend 'layout-test.html'}}
 
-
-
-        <!-- PRICING SECTION -->
-        <div id="dg">
-                <div class="container">
-                        <div class="row centered">
-				<h4>Dina lektioner</h4>
-                                <div class="col-lg-3">
-                    <!-- START PRICING TABLE -->
-                    <div class="pricing-option">
-                        <div class="pricing-top top">
-{{for leason in leasons:}}
-                                        <div>
-                            			<span class="pricing-edition">
-                                		        {{=leason['title']}} 
-						</span>
-                            			<span class="pricing-edition">
-							{{if leason['horse'] != "":}}
-                                		        	Din häst: {{=leason['horse']}} 
-							{{pass}}
-						</span>
-                            			<span class="price">
-                        	                	<span class="price-amount">
-                	                       			{{=leason['weekday']}} - {{=str(leason['time'])[:5]}}
-							</span>
-								<br><br><small>{{=leason['date']}}</small>
-						</span>
-                                        </div>
-{{pass}}
-
-                        </div>
-                    </div><!-- /pricing-option -->
-                    <!-- END PRICING TABLE -->
-                                </div><!-- /col -->
-
-
-
-
-
-
-                        </div><!-- row -->
-                </div><!-- container -->
-        </div><!-- DG -->
-
-
-
+<!-- PRICING SECTION -->
+      <div class="container">
+               <div class="pricing-option">
+                   <div class="pricing-top top">
+                      {{for leason in leasons:}}
+                      <div>
+                         <span class="pricing-edition">
+                            {{=leason['title']}} 
+                         </span>
+                         <span class="pricing-edition">
+                            {{if leason['horse'] != "":}}
+                            Din häst: {{=leason['horse']}} 
+                            {{pass}}
+                         </span>
+                         <span class="price">
+                            <span class="price-amount">
+                               {{=leason['weekday']}} - {{=str(leason['time'])[:5]}}
+                            </span>
+                            <br><br><small>{{=leason['date']}}</small>
+                         </span>
+                      </div>
+                      {{pass}}
+                   </div> <!-- pricing-top -->
+               </div><!-- /pricing-option -->
+      </div><!-- container -->
 
 
 
