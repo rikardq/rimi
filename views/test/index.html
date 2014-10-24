@@ -1,0 +1,86 @@
+{{extend 'layout-slick.html'}}
+
+
+
+        <!-- PRICING SECTION -->
+        <div id="dg">
+                <div class="container">
+                        <div class="row centered">
+				<h4>Dina lektioner</h4>
+                                <div class="col-lg-3">
+                    <!-- START PRICING TABLE -->
+                    <div class="pricing-option">
+                        <div class="pricing-top top">
+{{for leason in leasons:}}
+                                        <div>
+                            			<span class="pricing-edition">
+                                		        {{=leason['title']}} 
+						</span>
+                            			<span class="pricing-edition">
+							{{if leason['horse'] != "":}}
+                                		        	Din häst: {{=leason['horse']}} 
+							{{pass}}
+						</span>
+                            			<span class="price">
+                        	                	<span class="price-amount">
+                	                       			{{=leason['weekday']}} - {{=str(leason['time'])[:5]}}
+							</span>
+								<br><br><small>{{=leason['date']}}</small>
+						</span>
+                                        </div>
+{{pass}}
+
+                        </div>
+                    </div><!-- /pricing-option -->
+                    <!-- END PRICING TABLE -->
+                                </div><!-- /col -->
+
+
+
+
+
+
+                        </div><!-- row -->
+                </div><!-- container -->
+        </div><!-- DG -->
+
+
+
+
+
+
+                <section id="features" class="blue">
+                        <div class="content">
+				<div class="center">
+{{for leason in leasons:}}
+					<div><h3>{{=leason['date']}}</h3></div>
+{{pass}}
+				</div>
+			</div>
+		</section>
+
+    <script type="text/javascript">
+$('.top').slick({
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: false,
+    fade: true,
+    asNavFor: '.center'
+});
+
+
+$('.center').slick({
+  centerMode: true,
+  centerPadding: '60px',
+  slidesToShow: 3,
+  asNavFor: '.top',
+  variableWidth: true,
+  focusOnSelect: true
+});
+
+</script>
+
+
+
+
+
