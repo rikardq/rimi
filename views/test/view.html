@@ -20,7 +20,11 @@
                             </span>
                             <br><br><small>
                             {{if leason['horse']:}}
-                            Din häst: {{=leason['horse']}} 
+                                Din häst: {{=leason['horse']}} 
+                                {{if display_horse_pic(leason['horse']):}}
+                                    {{pix=display_horse_pic(leason['horse'])}}
+                                     <img src="{{=URL('rimi','default','download', args=pix)}}">
+                                {{pass}}
                             {{pass}}
                             </small>
                          </span>
