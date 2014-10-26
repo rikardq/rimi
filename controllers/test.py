@@ -36,7 +36,7 @@ too_late_to_canx = "För sent att avboka din lektion"
 
 def view(): 
 
-    return dict(leasons=list_leasondates(1), rebooked=list_rebookings(1))
+    return dict(leasons=list_leasondates(1), rebooked=list_rebookings(1), rebooked2=get_rebooked_leasons(1))
 
 def rebook():
     return dict(rebookable=list_rebookable(1))

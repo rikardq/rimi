@@ -1,12 +1,13 @@
 {{extend 'layout-test.html'}}
 
-<!-- PRICING SECTION -->
-                <small><a href="{{=URL('rebook')}}">Boka en igenridning</a></small>
+<h1>Bizniss! Knarkpipa zwAg</h1>
+
+
+
+
 <div class="row">
-
     <div class="col-md-offset-3 col-md-6">
-
-        <h4>Dina lektioner<h4>
+        <h4>Lektioner</h4>
                <div class="pricing-option">
                    <div class="pricing-top top">
                       {{for leason in leasons:}}
@@ -34,9 +35,6 @@
                </div><!-- /pricing-option -->
     </div> <!-- col-md-4 -->
 
-    <div class="col-md-2">
-
-    </div> <!-- col-md-4 -->
 </div> <!-- ends row -->
 
 
@@ -52,7 +50,25 @@
             </div>
         </div>
     </div>
-</div>
+</div> <!-- ends row -->
+
+<div class="row">
+    <div class="col-md-4">
+    {{if len(rebooked) > 0:}}
+        <h6>Inbokade igenridningar</h6>
+            <div class="dg">
+                <p class="bg-info">
+                    {{for rebooking in rebooked:}}
+                        {{=rebooking['weekday']}} - kl {{=str(rebooking['time'])[:5]}} - {{=rebooking['date']}} 
+                        <br>
+                    {{pass}}
+                    </small>
+                </p>
+            </div> <!-- pricing-top -->
+        </div><!-- /pricing-option -->
+    {{pass}}
+    </div> <!-- col -->
+</div> <!-- rowz -->
 
 
     <script type="text/javascript">
@@ -75,5 +91,4 @@ $('.center').slick({
 });
 
 </script>
-
 
