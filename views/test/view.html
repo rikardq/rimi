@@ -1,44 +1,55 @@
 {{extend 'layout-test.html'}}
 
 <!-- PRICING SECTION -->
-      <div class="container">
-        <h4>Titta på dina lektioner o bokade igenridningar</h4>
                 <small><a href="{{=URL('rebook')}}">Boka en igenridning</a></small>
+<div class="row">
+
+    <div class="col-md-offset-3 col-md-6">
+
+        <h4>Dina lektioner<h4>
                <div class="pricing-option">
                    <div class="pricing-top top">
                       {{for leason in leasons:}}
                       <div>
                          <span class="pricing-edition">
-                            {{=leason['title']}} 
-                         </span>
-                         <span class="pricing-edition">
-                            {{if leason['horse'] != "":}}
-                            Din häst: {{=leason['horse']}} 
-                            {{pass}}
+                            {{=leason['date']}}</small>
                          </span>
                          <span class="price">
                             <span class="price-amount">
-                               {{=leason['weekday']}} - {{=str(leason['time'])[:5]}}
+                               {{=leason['weekday']}}<br>{{=str(leason['time'])[:5]}}
                             </span>
-                            <br><br><small>{{=leason['date']}}</small>
+                            <br><br><small>
+                            {{if leason['horse']:}}
+                            Din häst: {{=leason['horse']}} 
+                            {{pass}}
+                            </small>
                          </span>
                       </div>
                       {{pass}}
                    </div> <!-- pricing-top -->
                </div><!-- /pricing-option -->
-      </div><!-- container -->
+    </div> <!-- col-md-4 -->
+
+    <div class="col-md-2">
+
+    </div> <!-- col-md-4 -->
+</div> <!-- ends row -->
 
 
 
-                <section id="features" class="blue">
-                        <div class="content">
-				<div class="center">
-{{for leason in leasons:}}
-					<div><h3>{{=leason['date']}}</h3></div>
-{{pass}}
-				</div>
-			</div>
-		</section>
+
+<div class="row">
+    <div class="col-md-offset-3 col-md-6">
+        <div class="blue">
+            <div class="content center">
+                {{for leason in leasons:}}
+			        <div><h3>{{=leason['date']}}</h3></div>
+                {{pass}}
+            </div>
+        </div>
+    </div>
+</div>
+
 
     <script type="text/javascript">
 $('.top').slick({
@@ -60,10 +71,5 @@ $('.center').slick({
 });
 
 </script>
-
-{{for rebooking in rebookings:}}
-    <br>
-    {{=rebooking['weekday']}} - {{=rebooking['date']}} - kl: {{=str(rebooking['time'])[:5]}}
-{{pass}}
 
 

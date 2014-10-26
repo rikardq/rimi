@@ -6,7 +6,7 @@
                 <small><a href="{{=URL('view')}}">Titta på dina fina lektioner</a></small>
                <div class="pricing-option">
                    <div class="pricing-top top">
-                      {{for rebooking in rebookings:}}
+                      {{for rebooking in rebookable:}}
                       <div>
                          <span class="pricing-edition">
                             Boka igenridning
@@ -27,12 +27,32 @@
                 <section id="features" class="blue">
                         <div class="content">
 				<div class="center">
-{{for rebooking in rebookings:}}
+{{for rebooking in rebookable:}}
 					<div><h3>{{=rebooking['date']}}</h3></div>
 {{pass}}
 				</div>
 			</div>
 		</section>
+
+
+
+
+    <div class="row">
+        <div class="span12">
+            <div class="col-md-6"> 
+                test
+            </div>
+            <div class="col-md-6"> 
+                test
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
 
     <script type="text/javascript">
 $('.top').slick({
