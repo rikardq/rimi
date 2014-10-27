@@ -24,7 +24,7 @@ max_rebook_days = 31
 
 ### MESSAGE VARIABLES
 
-leason_title = "Avboka Din lektion"
+leason_title = ""
 rebooked_title = "Inbokad igenridning"
 canx_by_instructor = "Inställd av instruktören"
 canx_by_rider = "Inställd av ryttaren"
@@ -119,7 +119,8 @@ def list_leasondates(cust_id):
             if canxbyadmin(leason_start_date,leason_id):
                 title = canx_by_instructor 
 
-            if leason_start_date in canx_leasons:
+            # See if leason_id, cust_id and cur date matches a cancelled_leason entry
+            if len(db((db.cancelled_leasons.id_customer==cust_id)&(db.cancelled_leasons.id_leason==leason_id)&(db.cancelled_leasons.cancelled_date==leason_start_date)).select()) > 0:
                 title = canx_by_rider 
 
             # Check if todays leason is too late to cancel
@@ -131,6 +132,7 @@ def list_leasondates(cust_id):
             "horse":horse_name,
             "time":leason_data.leason_time,
             "weekday":leason_data.week_day,
+            "leason_id":leason_id,
             "date":leason_start_date
             })
 
@@ -148,7 +150,8 @@ def list_leasondates(cust_id):
                 # default 
                 title = leason_title
 
-                if leason_start_date in canx_leasons:
+                # See if leason_id, cust_id and cur date matches a cancelled_leason entry
+                if len(db((db.cancelled_leasons.id_customer==cust_id)&(db.cancelled_leasons.id_leason==leason_id)&(db.cancelled_leasons.cancelled_date==leason_start_date)).select()) > 0:
                     title = canx_by_rider 
 
                 if canxbyadmin(leason_start_date,leason_data.id):
@@ -159,6 +162,7 @@ def list_leasondates(cust_id):
                 "horse":horse_name,
                 "time":leason_data.leason_time,
                 "weekday":leason_data.week_day,
+                "leason_id":leason_id,
                 "date":leason_start_date
                 })
 
@@ -189,6 +193,7 @@ def list_leasondates(cust_id):
               "horse":horse_name,
               "time":leason_data.leason_time,
               "weekday":translate_weekday(rebooked_leason["leason_date"].weekday()) ,
+              "leason_id":leason_id,
               "date":rebooked_leason["leason_date"]
                })
 
@@ -335,4 +340,23 @@ def book_rebooking():
         session.flash=("Det går ej att boka igenridning utan igenridningskredit. För att få kredit måste man avboka en lektion.")
         redirect(URL('index.html'))
     return dict(form=form, helper=helper)
+
+
+def cancel_leason():
+    #
+    cust_id = request.args(0)
+    leason_id = request.args(1)
+    leason_date = request.args(2)
+
+    helper = "När du har avbokat en lektion så får du en igenridnings kredit. Den kan du använda för att rida igen din lektion som du nu avbokar. Tänk på att en avbokad lektion inte går att ångra."
+    form = FORM.confirm("Jag förstår reglerna, avboka min lektion.")
+    if form.accepted:
+        if db.cancelled_leasons.validate_and_insert(id_leason=leason_id, cancelled_date=leason_date, id_customer=cust_id, when_cancelled=datetime.now()):
+            alter_credit("add", cust_id, 1)
+            response.flash=("Lektionen är avbokad")
+            #redirect(URL('view.html'))
+
+    return dict(form=form, helper=helper)
+
+
 

@@ -20,7 +20,6 @@
 ## after defining tables, uncomment below to enable auditing
 # auth.enable_record_versioning(db)
 
-
 # This table contains various variables tied to the administrator interface.
 # For example, the active semester, number of days a customer should be able to see rebooking leasons.
 

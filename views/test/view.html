@@ -3,17 +3,20 @@
 <h1>Bizniss! Knarkpipa zwAg</h1>
 
 
-
-
 <div class="row">
-    <div class="col-md-offset-3 col-md-6">
+    <div class="col-md-3">
+        <br><br><br><br><br>
+        <div id="stuffithere">
+        </div>
+    </div>
+    <div class="col-md-6">
         <h4>Lektioner</h4>
                <div class="pricing-option">
                    <div class="pricing-top top">
                       {{for leason in leasons:}}
                       <div>
                          <span class="pricing-edition">
-                            {{=leason['date']}}</small>
+                            {{=leason['date']}} {{=leason['title']}}</small>
                          </span>
                          <span class="price">
                             <span class="price-amount">
@@ -22,11 +25,15 @@
                             <br><br><small>
                             {{if leason['horse']:}}
                                 Din häst: {{=leason['horse']}} 
-                                {{if display_horse_pic(leason['horse']):}}
-                                    {{pix=display_horse_pic(leason['horse'])}}
+                                {{pix=display_horse_pic(leason['horse'])}}
+                                {{if pix:}}
                                      <img src="{{=URL('rimi','default','download', args=pix)}}">
                                 {{pass}}
                             {{pass}}
+                            {{if leason['title'] == "":}} 
+                                {{=A("Avboka lektionen", callback=URL('cancel_leason.html', args=[1, leason['leason_id'], leason['date']]), target='stuffithere')}}
+                            {{pass}}
+                            {{=leason['title']}}
                             </small>
                          </span>
                       </div>
