@@ -9,6 +9,10 @@
 
 <div class="row">
     <div class="col-md-3">
+        <a class="btn btn-default btn-lg" type="button" href='{{=URL('view')}}'>
+  &#10094;  Tillbaks till mina lektioner</a> 
+
+
         <br><br><br><br><br>
         <div id="stuffithere">
         </div>
@@ -20,7 +24,7 @@
                       {{for rebooking in rebookable:}}
                     <div>
                          <span class="pricing-edition">
-                            {{=rebooking['date']}} {{=rebooking['title']}}</small>
+                            {{=rebooking['date']}}</small>
                          </span>
                          <span class="price">
                             <span class="price-amount">

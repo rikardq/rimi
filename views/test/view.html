@@ -1,7 +1,4 @@
 {{extend 'layout-test.html'}}
-
-<h1>Bizniss! Knarkpipa zwAg</h1>
-
 {{if session.flasher != "":}}
     !!! ATTENCIONE !!! MsG: {{=session.flasher}} !!! ENDCELENTO OF EL MESSAGA !!!
     {{session.flasher = ""}}
@@ -35,7 +32,7 @@
                                 {{pass}}
                             {{pass}}
                             {{if leason['title'] == "":}} 
-                                {{=A("Avboka lektionen", callback=URL('cancel_leason', vars=dict(confirmed="notyet",cust_id=1,leason_id=leason['leason_id'],leason_date=leason['date']) ), target='stuffithere')}}
+                                {{=A("Avboka lektionen", callback=URL('cancel_leason', vars=dict(confirmed="notyet",cust_id=cust_id,leason_id=leason['leason_id'],leason_date=leason['date']) ), target='stuffithere')}}
                             {{pass}}
                             {{=leason['title']}}
                             </small>
@@ -49,7 +46,11 @@
 {{if customer_credits > 0:}}
 
     <div class="col-md-3">
-        <h4>Boka igenridning</h4><br>
+        <a class="btn btn-default btn-lg" type="button" href='{{=URL('rebook')}}'>
+  Boka en igenridning &#10095;</a>    
+<br>
+<br>
+<br>
         <div class="pricing-option">
                    <div class="pricing-top">
                          <span class="pricing-edition">
@@ -60,7 +61,6 @@
                             {{=customer_credits}}
                             </span>
                             <br><br><small> lektioner att rida igen. <br>
-                            {{=A("Boka in en igenridning", _href=URL("rebook"))}}
                             </small>
                         </span>
                     </div>
@@ -99,10 +99,32 @@
                     {{pass}}
                     </small>
                 </p>
-            </div> <!-- pricing-top -->
-        </div><!-- /pricing-option -->
+            </div> 
     {{pass}}
     </div> <!-- col -->
+
+    <div class="col-md-4">
+    {{if len(cancelled) > 0:}}
+        <h6>Avbokade lektioner</h6>
+            <div class="dg">
+                <p class="bg-info">
+                    {{for canx in cancelled:}}
+                        {{=canx['weekday']}} - kl {{=str(canx['time'])[:5]}} - {{=canx['date']}}
+                        <br>
+                    {{pass}}
+                    </small>
+                </p>
+            </div> 
+    {{pass}}
+    </div> <!-- col -->
+
+
+
+
+
+
+
+
 </div> <!-- rowz -->
 
 

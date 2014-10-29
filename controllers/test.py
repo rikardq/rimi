@@ -34,24 +34,51 @@ canx_by_instructor = "Inställd av instruktören"
 canx_by_rider = "Inställd av ryttaren"
 too_late_to_canx = "För sent att avboka din lektion"
 
+### HELPERS
+# message to display when canx a leason
+cancel_leason_helper = "När du har avbokat en lektion så får du en igenridnings kredit. Den kan du använda för att rida igen din lektion som du nu avbokar. Tänk på att en avbokad lektion inte går att ångra."
+# For confirming booking a reride
+book_reride_helper = "När du har bokat en igenridning så är din kredit förbrukad. En bokad igenridning går inte att boka om, eller avbokas."
 
 
 ##### END
 
 def view(): 
-    customer_credits = db(db.customer.id==cust_id).select(db.customer.credits)[0]['credits'] 
-    leasons=list_leasondates(1)
-    rebooked=list_rebookings(1)
+    cust_id = 1 
+    customer_credits = db.customer[cust_id].credits
+    leasons=list_leasondates(cust_id)
+    rebooked=list_rebookings(cust_id)
+    cancelled=list_cancelled(cust_id)
     return locals() 
 
 def rebook():
-    customer_credits = db(db.customer.id==cust_id).select(db.customer.credits)[0]['credits'] 
+    customer_credits = db.customer[cust_id].credits
     rebookable=list_rebookable(cust_id)
+    # for the blue display bar
     rebooked=list_rebookings(cust_id)
     return locals() 
 
+def list_cancelled(cust_id):
+    ### Retrieve list of cancelled customer leasons
+    ### present N futurez only
+    newmaster = []
+    canx_leasons = db(db.cancelled_leasons.id_customer == cust_id).select()
+    for leason in canx_leasons:
+        if leason['cancelled_date'] >= today:
+            newmaster.append({
+            "title":canx_by_rider,
+            "time": db.leason[leason['id_leason']].leason_time, 
+            "weekday": db.leason[leason['id_leason']].week_day,
+            "date": leason['cancelled_date'] 
+            })
+
+    finalmaster= sorted(newmaster, key=itemgetter('date'))
+
+    return (finalmaster)
+
 
 def list_rebookings(cust_id):
+    ### Retrieve list of rebookings customer has already booked
     newmaster = []
     # Add all rebooked dates (only pressent and future ones)
     rebooked_leasons = get_rebooked_leasons(cust_id)
@@ -319,7 +346,7 @@ def list_rebookable(customer):
                     # NO add if the customer is already booked for a reride on leason/date combo 
                     if len(db((db.rebooking.id_leason == leason["leason_id"]) & (db.rebooking.id_customer == cust_id) & (db.rebooking.leason_date == first_leasondate)).select()) != 1:
                         reride_slots.append({
-                            "title":"WTF",
+                            "title":A("Boka igenridning", callback=URL('book_rebooking', vars=dict(confirmed="notyet",cust_id=cust_id,leason_id=leason['leason_id'],leason_date=first_leasondate) ), target='stuffithere'),
                             "date":first_leasondate,
                             "weekday":leason["weekday"],
                             "time":leason["leason_time"],
@@ -331,25 +358,27 @@ def list_rebookable(customer):
 
 
 def book_rebooking():
-    # The function to book a rebooking.The user id is for now 
-    # passed here as a request.args but should obviously be migrated into the greater auth scheme
-    cust_id = request.args(0)
-    leason_id = request.args(1)
-    leason_date = request.args(2)
+    # The function to book a rebooking.
+    cust_id = request.vars['cust_id']
+    leason_id = request.vars['leason_id']
+    leason_date = request.vars['leason_date']
+    confirmed = request.vars['confirmed']
 
     # Only proceed if there are credits to do this
     if db.customer[cust_id].credits > 0:
-        helper = "När du har bokat en igenridning så är din kredit förbrukad. En bokad igenridning går inte att boka om, eller avbokas."
-        form = FORM.confirm("Jag förstår, boka min igenridning!")
-        if form.accepted:
-            if db.rebooking.validate_and_insert(id_leason=leason_id, id_customer=cust_id, leason_date=leason_date):
-                alter_credit("subtract",cust_id,1)
-                session.flash=("Igenridningen är bokad!")
-                redirect(URL('index.html'))
+        if confirmed == "notyet":
+            helper = book_reride_helper 
+            helper += "<br><br>"
+            helper += str(A("Boka igenridning", callback=URL('book_rebooking', vars=dict(confirmed="yep",cust_id=cust_id,leason_id=leason_id,leason_date=leason_date) ), target='stuffithere'))
+            return helper
+        elif db.rebooking.validate_and_insert(id_leason=leason_id, id_customer=cust_id, leason_date=leason_date):
+            alter_credit("subtract",cust_id,1)
+            helper = ""
+            session.flasher = "Igenridningen är bokad!"
+            redirect(URL('rebook'), client_side=True)
     else:
         session.flash=("Det går ej att boka igenridning utan igenridningskredit. För att få kredit måste man avboka en lektion.")
-        redirect(URL('index.html'))
-    return dict(form=form, helper=helper)
+
 
 
 def cancel_leason():
@@ -360,16 +389,15 @@ def cancel_leason():
     confirmed = request.vars['confirmed']
 
     if confirmed == "notyet":
-        helper = "När du har avbokat en lektion så får du en igenridnings kredit. Den kan du använda för att rida igen din lektion som du nu avbokar. Tänk på att en avbokad lektion inte går att ångra."
+        helper = cancel_leason_helper
         helper += "<br><br>"
         helper += str(A("Avboka lektionen", callback=URL('cancel_leason', vars=dict(confirmed="yep",cust_id=cust_id,leason_id=leason_id,leason_date=leason_date) ), target='stuffithere'))
 
         return helper 
-    else:
-        if db.cancelled_leasons.validate_and_insert(id_leason=leason_id, cancelled_date=leason_date, id_customer=cust_id, when_cancelled=datetime.now()):
-            alter_credit("add", cust_id, 1)
-            helper = ""
-            session.flasher = "Lektionen är avbokad"
-            redirect(URL('view'), client_side=True)
+    elif db.cancelled_leasons.validate_and_insert(id_leason=leason_id, cancelled_date=leason_date, id_customer=cust_id, when_cancelled=datetime.now()):
+        alter_credit("add", cust_id, 1)
+        helper = ""
+        session.flasher = "Lektionen är avbokad"
+        redirect(URL('view'), client_side=True)
 
 
