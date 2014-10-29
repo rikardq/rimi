@@ -19,7 +19,11 @@ today=date.today()
 
 # If this value is not set in the admin_settings table, use default below
 max_rebook_days = 31
-#
+#o
+
+### Setting this like this for now. this
+cust_id = 1
+
 
 
 ### MESSAGE VARIABLES
@@ -35,11 +39,16 @@ too_late_to_canx = "För sent att avboka din lektion"
 ##### END
 
 def view(): 
-
-    return dict(leasons=list_leasondates(1), rebooked=list_rebookings(1), rebooked2=get_rebooked_leasons(1))
+    customer_credits = db(db.customer.id==cust_id).select(db.customer.credits)[0]['credits'] 
+    leasons=list_leasondates(1)
+    rebooked=list_rebookings(1)
+    return locals() 
 
 def rebook():
-    return dict(rebookable=list_rebookable(1))
+    customer_credits = db(db.customer.id==cust_id).select(db.customer.credits)[0]['credits'] 
+    rebookable=list_rebookable(cust_id)
+    rebooked=list_rebookings(cust_id)
+    return locals() 
 
 
 def list_rebookings(cust_id):
@@ -310,6 +319,7 @@ def list_rebookable(customer):
                     # NO add if the customer is already booked for a reride on leason/date combo 
                     if len(db((db.rebooking.id_leason == leason["leason_id"]) & (db.rebooking.id_customer == cust_id) & (db.rebooking.leason_date == first_leasondate)).select()) != 1:
                         reride_slots.append({
+                            "title":"WTF",
                             "date":first_leasondate,
                             "weekday":leason["weekday"],
                             "time":leason["leason_time"],
@@ -344,19 +354,22 @@ def book_rebooking():
 
 def cancel_leason():
     #
-    cust_id = request.args(0)
-    leason_id = request.args(1)
-    leason_date = request.args(2)
+    cust_id = request.vars['cust_id']
+    leason_id = request.vars['leason_id']
+    leason_date = request.vars['leason_date']
+    confirmed = request.vars['confirmed']
 
-    helper = "När du har avbokat en lektion så får du en igenridnings kredit. Den kan du använda för att rida igen din lektion som du nu avbokar. Tänk på att en avbokad lektion inte går att ångra."
-    form = FORM.confirm("Jag förstår reglerna, avboka min lektion.")
-    if form.accepted:
+    if confirmed == "notyet":
+        helper = "När du har avbokat en lektion så får du en igenridnings kredit. Den kan du använda för att rida igen din lektion som du nu avbokar. Tänk på att en avbokad lektion inte går att ångra."
+        helper += "<br><br>"
+        helper += str(A("Avboka lektionen", callback=URL('cancel_leason', vars=dict(confirmed="yep",cust_id=cust_id,leason_id=leason_id,leason_date=leason_date) ), target='stuffithere'))
+
+        return helper 
+    else:
         if db.cancelled_leasons.validate_and_insert(id_leason=leason_id, cancelled_date=leason_date, id_customer=cust_id, when_cancelled=datetime.now()):
             alter_credit("add", cust_id, 1)
-            response.flash=("Lektionen är avbokad")
-            #redirect(URL('view.html'))
-
-    return dict(form=form, helper=helper)
-
+            helper = ""
+            session.flasher = "Lektionen är avbokad"
+            redirect(URL('view'), client_side=True)
 
 
