@@ -5,9 +5,15 @@ from isoweek import Week
 instructor_id = 1
 leasons = db(db.owner_of_leason.instructor_id==instructor_id).select(db.owner_of_leason.leason_id)
 today=date.today()
+today_wd = today.weekday()
+
+dayz = ["Måndag","Tisdag","Onsdag","Torsdag","Fredag","Lördag","Söndag"]
 
 ### DISPLAY VARIABLES
-num_of_date_rows = 4 # 
+if session.num_of_date_rows is None:
+    num_of_date_rows = 4 #default is 4.  1, 2, 3, 4 or 6 
+else:
+    num_of_date_rows = int(session.num_of_date_rows)
 
 
 """
@@ -21,20 +27,47 @@ What can an instructor do?
 """
 
 def index():
-    a = Viewleason(1)
-    maindiv = "" 
-    startpoint = 0 
-    startdate = date(2014,11,3)
+    html_res = ""
+    for day in dayz:
+        leasons_for_this_day = []
+        for leason in leasons:
+            if len(db((db.leason.id==leason.leason_id)&(db.leason.week_day==day)).select()) > 0:
+                leasons_for_this_day.append(leason.leason_id)
 
-    while num_of_date_rows > startpoint: 
-        a.build_divs(startdate)
-        startpoint = startpoint + 1
-        startdate = startdate + timedelta(+7)
+        if len(leasons_for_this_day) > 0:
+            html_res += """
+    <div class="dg" data-toggle="collapse" data-target="#%s" aria-expanded="true" aria-controls="%s">
+        <h4>%s</h4> 
+    </div>
+    <div id="%s" class="collapse">\n""" % (day, day, day, day)
+            for leason in leasons_for_this_day: 
+                # Find first available date for this weekday
+                startdate = get_firstdate_weekday(reverse_translate_weekday(db.leason[leason].week_day), today)
 
-    a.end_div()
+                a = Viewleason(leason)
+                startpoint = 0 
 
-    return dict(divz=XML(a.divz)) 
+                while num_of_date_rows > startpoint: 
+                    a.build_divs(startdate)
+                    startpoint = startpoint + 1
+                    startdate = startdate + timedelta(+7)
 
+                a.end_div()
+                # add to html variable
+                html_res += a.divz
+            # finish the div
+            html_res += "</div>"
+    
+
+
+    return dict(html_res=XML(html_res)) 
+
+def change_num_of_date_rows(): 
+    session.num_of_date_rows = request.args(0) 
+    # refresh view
+    redirect(URL('index'),client_side=True)
+
+    
 
 
 class Viewleason:
@@ -61,11 +94,12 @@ class Viewleason:
         num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(self.leason_date,self.leason_id)
         max_customers = int(db(db.leason.id==self.leason_id).select()[0]['max_customers'])
         available_slots = max_customers - num_riders - num_rebooks + num_canx 
+        col_division = 12/num_of_date_rows 
 
         self.divz += """
-                <div class="col-md-3">
+                <div class="col-md-%s">
                     <div class="list-group">
-                        <li class="list-group-item list-group-item-warning">%s</li>\n""" % self.leason_date
+                        <li class="list-group-item list-group-item-warning">%s</li>\n""" % (col_division, self.leason_date)
 
         for reg_rider in reg_riders:
             if reg_rider in canx_riders:
@@ -73,6 +107,10 @@ class Viewleason:
             else:
                 divclass = "success"
             self.divz += "             <a href='#' class='list-group-item list-group-item-%s'>%s %s</a>\n" % (divclass, reg_rider['first_name'], reg_rider['last_name'])
+
+        for rebook_rider in rebook_riders:
+            divclass="info"
+            self.divz += "             <a href='#' class='list-group-item list-group-item-%s'>%s %s</a>\n" % (divclass, rebook_rider['first_name'], rebook_rider['last_name'])
 
         # Finish the row with empty slots
         if available_slots > 0:

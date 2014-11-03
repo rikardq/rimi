@@ -21,11 +21,6 @@ today=date.today()
 max_rebook_days = 31
 #o
 
-### Setting this like this for now. this
-cust_id = 1
-
-
-
 ### MESSAGE VARIABLES
 
 leason_title = ""
@@ -44,7 +39,7 @@ book_reride_helper = "När du har bokat en igenridning så är din kredit förbr
 ##### END
 
 def view(): 
-    cust_id = 1 
+    cust_id=2
     customer_credits = db.customer[cust_id].credits
     leasons=list_leasondates(cust_id)
     rebooked=list_rebookings(cust_id)
@@ -52,6 +47,7 @@ def view():
     return locals() 
 
 def rebook():
+    cust_id=2
     customer_credits = db.customer[cust_id].credits
     rebookable=list_rebookable(cust_id)
     # for the blue display bar
