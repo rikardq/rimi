@@ -193,3 +193,11 @@ def get_horse_info(leason_id,leason_date,customer_id):
         horse_name = None
     return horse_name 
 
+def display_horse_pic(horse_name):
+  # simply returns image filename
+  q = db(db.horse.name==horse_name).select(db.horse.image)
+  if q[0]['image']:
+    return q[0]['image']
+  else:
+    return False
+

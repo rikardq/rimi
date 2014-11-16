@@ -1,44 +1,132 @@
 {{extend 'layout-test.html'}}
+{{if session.flasher != "":}}
+    !!! ATTENCIONE !!! MsG: {{=session.flasher}} !!! ENDCELENTO OF EL MESSAGA !!!
+    {{session.flasher = ""}}
+{{pass}}
 
-<!-- PRICING SECTION -->
-      <div class="container">
-        <h4>Titta på dina lektioner o bokade igenridningar</h4>
-                <small><a href="{{=URL('rebook')}}">Boka en igenridning</a></small>
-               <div class="pricing-option">
+<div class="row">
+    <div class="col-md-3">
+        <br><br><br><br><br>
+        <div id="stuffithere">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h4>Lektioner</h4>
+              <div class="pricing-option">
                    <div class="pricing-top top">
                       {{for leason in leasons:}}
-                      <div>
+                    <div>
                          <span class="pricing-edition">
-                            {{=leason['title']}} 
-                         </span>
-                         <span class="pricing-edition">
-                            {{if leason['horse'] != "":}}
-                            Din häst: {{=leason['horse']}} 
-                            {{pass}}
+                            {{=leason['date']}} {{=leason['title']}}</small>
                          </span>
                          <span class="price">
                             <span class="price-amount">
-                               {{=leason['weekday']}} - {{=str(leason['time'])[:5]}}
+                               {{=leason['weekday']}}<br>{{=str(leason['time'])[:5]}}
                             </span>
-                            <br><br><small>{{=leason['date']}}</small>
+                            <br><br><small>
+                            {{if leason['horse']:}}
+                                Din häst: {{=leason['horse']}} 
+                                {{pix=display_horse_pic(leason['horse'])}}
+                                {{if pix:}}
+                                     <img src="{{=URL('rimi','default','download', args=pix)}}">
+                                {{pass}}
+                            {{pass}}
+                            {{if leason['title'] == "":}} 
+                                {{=A("Avboka lektionen", callback=URL('cancel_leason', vars=dict(confirmed="notyet",cust_id=cust_id,leason_id=leason['leason_id'],leason_date=leason['date']) ), target='stuffithere')}}
+                            {{pass}}
+                            {{=leason['title']}}
+                            </small>
                          </span>
                       </div>
                       {{pass}}
                    </div> <!-- pricing-top -->
                </div><!-- /pricing-option -->
-      </div><!-- container -->
+    </div> <!-- col-md-6 -->
 
+{{if customer_credits > 0:}}
 
+    <div class="col-md-3">
+        <a class="btn btn-default btn-lg" type="button" href='{{=URL('rebook')}}'>
+  Boka en igenridning &#10095;</a>    
+<br>
+<br>
+<br>
+        <div class="pricing-option">
+                   <div class="pricing-top">
+                         <span class="pricing-edition">
+                        Du har: 
+                        </span>
+                         <span class="price">
+                            <span class="price-amount">
+                            {{=customer_credits}}
+                            </span>
+                            <br><br><small> lektioner att rida igen. <br>
+                            </small>
+                        </span>
+                    </div>
+        </div>
 
-                <section id="features" class="blue">
-                        <div class="content">
-				<div class="center">
-{{for leason in leasons:}}
-					<div><h3>{{=leason['date']}}</h3></div>
+    </div> <!-- col-md-3 -->
+
 {{pass}}
-				</div>
-			</div>
-		</section>
+
+</div> <!-- ends row -->
+
+
+
+
+<div class="row">
+    <div class="col-md-offset-3 col-md-6">
+        <div class="blue">
+            <div class="content center">
+                {{for leason in leasons:}}
+			        <div><h3>{{=leason['date']}}</h3></div>
+                {{pass}}
+            </div>
+        </div>
+    </div>
+</div> <!-- ends row -->
+
+<div class="row">
+    <div class="col-md-4">
+    {{if len(rebooked) > 0:}}
+        <h6>Inbokade igenridningar</h6>
+            <div class="dg">
+                <p class="bg-info">
+                    {{for rebooking in rebooked:}}
+                        {{=rebooking['weekday']}} - kl {{=str(rebooking['time'])[:5]}} - {{=rebooking['date']}} 
+                        <br>
+                    {{pass}}
+                    </small>
+                </p>
+            </div> 
+    {{pass}}
+    </div> <!-- col -->
+
+    <div class="col-md-4">
+    {{if len(cancelled) > 0:}}
+        <h6>Avbokade lektioner</h6>
+            <div class="dg">
+                <p class="bg-info">
+                    {{for canx in cancelled:}}
+                        {{=canx['weekday']}} - kl {{=str(canx['time'])[:5]}} - {{=canx['date']}}
+                        <br>
+                    {{pass}}
+                    </small>
+                </p>
+            </div> 
+    {{pass}}
+    </div> <!-- col -->
+
+
+
+
+
+
+
+
+</div> <!-- rowz -->
+
 
     <script type="text/javascript">
 $('.top').slick({
@@ -60,10 +148,4 @@ $('.center').slick({
 });
 
 </script>
-
-{{for rebooking in rebookings:}}
-    <br>
-    {{=rebooking['weekday']}} - {{=rebooking['date']}} - kl: {{=str(rebooking['time'])[:5]}}
-{{pass}}
-
 

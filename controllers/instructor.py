@@ -4,7 +4,16 @@ from isoweek import Week
 
 instructor_id = 1
 leasons = db(db.owner_of_leason.instructor_id==instructor_id).select(db.owner_of_leason.leason_id)
-today=date(year=datetime.now().year,month=datetime.now().month,day=datetime.now().day)
+today=date.today()
+today_wd = today.weekday()
+
+dayz = ["Måndag","Tisdag","Onsdag","Torsdag","Fredag","Lördag","Söndag"]
+
+### DISPLAY VARIABLES
+if session.num_of_date_rows is None:
+    num_of_date_rows = 4 #default is 4.  1, 2, 3, 4 or 6 
+else:
+    num_of_date_rows = int(session.num_of_date_rows)
 
 
 """
@@ -18,125 +27,98 @@ What can an instructor do?
 """
 
 def index():
-    return dict(message="w00t")
+    html_res = ""
+    for day in dayz:
+        leasons_for_this_day = []
+        for leason in leasons:
+            if len(db((db.leason.id==leason.leason_id)&(db.leason.week_day==day)).select()) > 0:
+                leasons_for_this_day.append(leason.leason_id)
 
-def view_leason():
-    leason_id = request.args(0)
-    thisdate = request.args[1]
-    thisdate = date(int(thisdate[:4]),int(thisdate[5:7]),int(thisdate[8:10]))
-    thisweekday = translate_weekday(thisdate.weekday())
-    leason_data = db(db.leason.id == leason_id).select()[0]
-    num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(thisdate,leason_id)
-    return locals()
+        if len(leasons_for_this_day) > 0:
+            html_res += """
+    <div class="dg" data-toggle="collapse" data-target="#%s" aria-expanded="true" aria-controls="%s">
+        <h4>%s</h4> 
+    </div>
+    <div id="%s" class="collapse">\n""" % (day, day, day, day)
+            for leason in leasons_for_this_day: 
+                # Find first available date for this weekday
+                startdate = get_firstdate_weekday(reverse_translate_weekday(db.leason[leason].week_day), today)
 
-def view_leasons_day():
-    #Check if date carried over, if not assume today
-    if len(request.args) == 0: 
-        thisdate = datetime.today().date()
-    else:
-        thisdate = request.args[0]
-        thisdate = date(int(thisdate[:4]),int(thisdate[5:7]),int(thisdate[8:10]))
-    thisweekday = translate_weekday(thisdate.weekday())
-    leason_data = []
+                a = Viewleason(leason)
+                startpoint = 0 
 
-    # See what leasons matches this weekday for this instructor
-    for leason in leasons:
-        leason_id = leason["leason_id"]
-        ldata = db(db.leason.id==leason.leason_id).select()[0]
-        if db(db.leason.id==leason_id).select(db.leason.week_day)[0]["week_day"] == thisweekday:
-            # Check if this is a time limited leason and if this date we are viewing is in the range
-            if (ldata.limited == "Ja") & (thisdate >=ldata.start_date) & (thisdate <= ldata.end_date) or (ldata.limited == "Nej"):
-                num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(thisdate,leason_id)
+                while num_of_date_rows > startpoint: 
+                    a.build_divs(startdate)
+                    startpoint = startpoint + 1
+                    startdate = startdate + timedelta(+7)
 
-                # Check if cancelled
-                if len(db((db.admin_cancelled_leason.id_leason==leason_id) & (db.admin_cancelled_leason.leason_date==(thisdate))).select()) != 0:
-                    leason_data.append([str(leason_time)[:5],"Avbokad",num_total,num_rebooks,num_canx,leason_id])
-                else:
-                    leason_data.append([str(leason_time)[:5],num_riders,num_total,num_rebooks,num_canx,leason_id])
-            
-
-        
-    return dict(leason_data=leason_data,thisdate=thisdate,thisweekday=thisweekday)
-    
+                a.end_div()
+                # add to html variable
+                html_res += a.divz
+            # finish the div
+            html_res += "</div>"
     
 
 
-def view_leasons_week():
-    # Default view is the current week. We will return a dict, consisting of keys 1-7 each
-    # with its corresponding weekdays worth of leasons as values
-    # Check to see if we carried a week with us
-    if len(request.args):
-        week = int(request.args[0])
-    else: 
-        week = Week.thisweek()[1]
-    # Check to see if we also carried a year with us
-    try: 
-        year = int(request.args[1])
-    except:
-        year = date.today().year
+    return dict(html_res=XML(html_res)) 
 
-    lastweekofyear = Week.last_week_of_year(year)[1]
+def change_num_of_date_rows(): 
+    session.num_of_date_rows = request.args(0) 
+    # refresh view
+    redirect(URL('index'),client_side=True)
 
-    # If it is the last week of the year, fix forward button 
-    if lastweekofyear == week:
-        forwardweek = 1
-        forwardyear = year + 1
-    else:
-        forwardweek = week + 1
-        forwardyear = year 
-    # If it is the first week of the year, fix back button
-    if week == 1: 
-        backyear = year -1
-        backweek = Week.last_week_of_year(backyear)[1] 
-    else:
-        backyear = year
-        backweek = week - 1
+    
 
-    error = []
 
-    datez = {"Måndag":Week(year, week).monday(),
-    "Tisdag":Week(year, week).tuesday(),
-    "Onsdag":Week(year, week).wednesday(),
-    "Torsdag":Week(year, week).thursday(),
-    "Fredag":Week(year, week).friday(),
-    "Lördag":Week(year, week).saturday(),
-    "Söndag":Week(year, week).sunday()}
-    display_week = {"Måndag":[],"Tisdag":[],"Onsdag":[],"Torsdag":[],"Fredag":[],"Lördag":[],"Söndag":[]}
-    display_week2 = {"Måndag":[],"Tisdag":[],"Onsdag":[],"Torsdag":[],"Fredag":[],"Lördag":[],"Söndag":[]}
-    weekdays = ["Måndag","Tisdag","Onsdag","Torsdag","Fredag","Lördag","Söndag"]
+class Viewleason:
+    'Common class to prepare the view for a leason'
+    def __init__(self, leason_id):
+        self.leason_id = leason_id
+        self.time = str(db(db.leason.id == leason_id).select(db.leason.leason_time)[0]['leason_time'])[:5]
+        # start to construct the div
+        self.divz = """
+        <div class="dg" data-toggle="collapse" data-target="#%s" aria-expanded="true" aria-controls="%s">
+            <h4>%s</h4>
+        </div>
 
-    # Go through the leasons and place them into appropriate spot in week dict
-    for leason in leasons:
-        ldata = db(db.leason.id==leason.leason_id).select()[0]
-        # this leasons date in this view
-        this_date = datez[ldata.week_day]
-        # Check to see if it is a date limited leason, if so only add view if the date is within the range
-        if (ldata.limited == "Ja") & (this_date >=ldata.start_date) & (this_date <= ldata.end_date) or (ldata.limited == "Nej"):
-            # Use internal function to retrieve statistics and rider details(rider details will not be used here)
-            num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(this_date,ldata.id)
-            # Mark record if it has been cancelled by admin
-            if len(db((db.admin_cancelled_leason.id_leason==ldata.id) & (db.admin_cancelled_leason.leason_date==(this_date))).select()) != 0: 
-                display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":"Avbokad","num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total,"this_date":this_date})
+        <div id="%s" class="collapse">
+            <div class="row">\n""" % (self.leason_id, self.leason_id, self.time, self.leason_id)
+
+    def end_div(self):
+        self.divz += """
+            </div>
+        </div>"""
+
+    def build_divs(self, leason_date):
+        self.leason_date = leason_date
+        num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(self.leason_date,self.leason_id)
+        max_customers = int(db(db.leason.id==self.leason_id).select()[0]['max_customers'])
+        available_slots = max_customers - num_riders - num_rebooks + num_canx 
+        col_division = 12/num_of_date_rows 
+
+        self.divz += """
+                <div class="col-md-%s">
+                    <div class="list-group">
+                        <li class="list-group-item list-group-item-warning">%s</li>\n""" % (col_division, self.leason_date)
+
+        for reg_rider in reg_riders:
+            if reg_rider in canx_riders:
+                divclass = "danger"
             else:
-                display_week[ldata.week_day].append({"leason_time":str(ldata.leason_time)[:5],"id":int(ldata.id),"num_riders":num_riders,"num_rebooks":num_rebooks,"num_canx":num_canx, "num_total":num_total,"this_date":this_date})
+                divclass = "success"
+            self.divz += "             <a href='#' class='list-group-item list-group-item-%s'>%s %s</a>\n" % (divclass, reg_rider['first_name'], reg_rider['last_name'])
 
-    # Sort the entries, then dump the dict and return a list instead
-    for day in display_week:
-        daylist = display_week[day]
-        if daylist > 0:
-            daylist = sorted(daylist, key=lambda k: k['leason_time'])
-            for entry in daylist:
-                # Just create a sorted list
-                display_week2[day].append([entry["leason_time"],entry["num_riders"],entry["num_total"],entry["num_rebooks"],entry["num_canx"],entry["id"]])
+        for rebook_rider in rebook_riders:
+            divclass="info"
+            self.divz += "             <a href='#' class='list-group-item list-group-item-%s'>%s %s</a>\n" % (divclass, rebook_rider['first_name'], rebook_rider['last_name'])
 
-    # Lets not do this, it will mess with the data when it is updated, and when a user uses the back button. Keep querying the db everytime. Save the display_week variable in the session
-    session.display_week = display_week2
-    return locals() 
+        # Finish the row with empty slots
+        if available_slots > 0:
+            av_div = "          <a href='#' class='list-group-item list-group-item-active'>Ledig plats</a>\n"
+            self.divz +=  av_div * available_slots
 
-
-
-def assign_horse(cust_id, horse_id, leason_id, reserved_date):
-    db.reserved_horses.validate_and_insert(id_customer=cust_id, id_horse=horse_id, id_leason=leason_id, reserved_date=reserved_date)
-
-def view_rebooking_requests():
-    something
+        # finish this column
+        self.divz += """
+                        </li>
+                    </div>
+                </div>"""

@@ -20,7 +20,6 @@
 ## after defining tables, uncomment below to enable auditing
 # auth.enable_record_versioning(db)
 
-
 # This table contains various variables tied to the administrator interface.
 # For example, the active semester, number of days a customer should be able to see rebooking leasons.
 
@@ -134,6 +133,7 @@ db.define_table("rebooking",
 #Storing all horses associated with the business and their status.
 db.define_table("horse",
       SQLField("name", "string", label="Namn", notnull=True, default=None),
+      SQLField('image', 'upload'),
       SQLField("status", "string", requires=IS_IN_SET(['Aktiv','Inaktiv']), default='Inaktiv'),
       SQLField("horse_type", "string", label="Typ av häst", requires=IS_IN_SET(['Ponny','Häst']), default=None))
 

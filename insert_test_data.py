@@ -50,9 +50,10 @@ db.black_dates.insert(black_date="2013-08-20")
 db.black_dates.insert(black_date="2013-09-16")
 db.black_dates.insert(black_date="2013-11-28")
 
-db.horse.insert(name="Balder",status="Aktiv",horse_type="Ponny")
+db.horse.insert(name="Balder",image="horse.image.915051f2070f2e8f.62616c6465722e6a7067.jpg", status="Aktiv",horse_type="Ponny")
 db.horse.insert(name="Fanta",status="Aktiv",horse_type="Ponny")
 db.horse.insert(name="Sandra",status="Aktiv",horse_type="Ponny")
+db.horse.insert(name="Vanessa", image="horse.image.ab902f44744259f9.76616e657373612e6a7067.jpg",status="Aktiv",horse_type="Ponny")
 
 db.reserved_horses.insert(id_customer=1,id_horse=2,id_leason=4,reserved_date="2013-10-31")
 db.reserved_horses.insert(id_customer=1,id_horse=1,id_leason=4,reserved_date="2013-11-14")

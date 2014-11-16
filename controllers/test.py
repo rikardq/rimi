@@ -19,122 +19,193 @@ today=date.today()
 
 # If this value is not set in the admin_settings table, use default below
 max_rebook_days = 31
-#
+#o
+
+### Setting this like this for now. this
+cust_id = 1
+
 
 
 ### MESSAGE VARIABLES
 
-leason_title = "Avboka Din lektion"
+leason_title = ""
 rebooked_title = "Inbokad igenridning"
 canx_by_instructor = "Inställd av instruktören"
 canx_by_rider = "Inställd av ryttaren"
 too_late_to_canx = "För sent att avboka din lektion"
 
+### HELPERS
+# message to display when canx a leason
+cancel_leason_helper = "När du har avbokat en lektion så får du en igenridnings kredit. Den kan du använda för att rida igen din lektion som du nu avbokar. Tänk på att en avbokad lektion inte går att ångra."
+# For confirming booking a reride
+book_reride_helper = "När du har bokat en igenridning så är din kredit förbrukad. En bokad igenridning går inte att boka om, eller avbokas."
 
 
 ##### END
 
 def view(): 
-
-  #return dict(leasons=list_leasondates(1),displaylist=displaylist,datelist=datelist,message=datelist)
-  return dict(leasons=list_leasondates(1), rebookings=list_rebookings(1))
+    cust_id = 1 
+    customer_credits = db.customer[cust_id].credits
+    leasons=list_leasondates(cust_id)
+    rebooked=list_rebookings(cust_id)
+    cancelled=list_cancelled(cust_id)
+    return locals() 
 
 def rebook():
-  return dict(rebookings=list_rebookings(1))
+    customer_credits = db.customer[cust_id].credits
+    rebookable=list_rebookable(cust_id)
+    # for the blue display bar
+    rebooked=list_rebookings(cust_id)
+    return locals() 
+
+def list_cancelled(cust_id):
+    ### Retrieve list of cancelled customer leasons
+    ### present N futurez only
+    newmaster = []
+    canx_leasons = db(db.cancelled_leasons.id_customer == cust_id).select()
+    for leason in canx_leasons:
+        if leason['cancelled_date'] >= today:
+            newmaster.append({
+            "title":canx_by_rider,
+            "time": db.leason[leason['id_leason']].leason_time, 
+            "weekday": db.leason[leason['id_leason']].week_day,
+            "date": leason['cancelled_date'] 
+            })
+
+    finalmaster= sorted(newmaster, key=itemgetter('date'))
+
+    return (finalmaster)
 
 
-def list_leasondates(customer):
-    '''
-    '''
-    cust_id = customer
+def list_rebookings(cust_id):
+    ### Retrieve list of rebookings customer has already booked
+    newmaster = []
+    # Add all rebooked dates (only pressent and future ones)
+    rebooked_leasons = get_rebooked_leasons(cust_id)
+    for rebooked_leason in rebooked_leasons:
+        if rebooked_leason["leason_date"] >= today:
+            rb_ltime = db.leason[rebooked_leason["leason_id"]]["leason_time"]
+            horse_name = get_horse_info(rebooked_leason["leason_id"], rebooked_leason["leason_date"], cust_id)
 
+            newmaster.append({
+              "title":rebooked_title,
+              "horse":horse_name,
+              "time":rb_ltime,
+              "weekday":translate_weekday(rebooked_leason["leason_date"].weekday()) ,
+              "date":rebooked_leason["leason_date"]
+               })
+
+
+    #  # # Sort out any black dates out of the list
+    # This oculd of been donein a more graceful way if we had a dict of dicts instead of a list of dicts.. but i dunno
+    removez = []
+    for leason in newmaster:
+        if leason['date'] in black_dates:
+            removez.append(leason)
+
+    for removezis in removez:
+        newmaster.remove(removezis)
+
+    # Try to sort this mess by date
+    finalmaster= sorted(newmaster, key=itemgetter('date'))
+
+    return (finalmaster)
+
+
+
+
+def list_leasondates(cust_id):
     # Collect all leasons in this 
     master_leasons = []
 
     # Get the customers leasons as stored in the one-to-many table leasons
-    try:
-        leasons = db(db.leasons.id_customer==cust_id).select()
-        for leason in leasons:
-            leason_id = leason["id_leason"]
-            # We need to retrieve the data for this leason from the leason table
-            leason_data = db(db.leason.id==leason_id).select()[0]
+    leasons = db(db.leasons.id_customer==cust_id).select()
+    for leason in leasons:
+        leason_id = leason["id_leason"]
+        leason_data = db(db.leason.id==leason_id).select()[0]
 
-            # We must translate the spelled out weekday, i.e. "Måndag" to a numeric value (0 for Monday, 
-            # 6 for Sunday to follow the convention that the timetuple wday uses. This is really gay
-            # but storing the weekdays as swedish in the table is pretty sweet, thanks to web2pys crud
-            # feature.
-            leason_weekday = reverse_translate_weekday(leason_data.week_day)
+        # Translate spelled out weekday to numeric value (0 = mon, 6 = sun)
+        leason_weekday = reverse_translate_weekday(leason_data.week_day)
 
-            # Is leason limited by stop/start dates?
-            try:
-                a=db((db.leason.id==leason_id)&(db.leason.limited=="Ja")).select(db.leason.start_date,db.leason.end_date)[0]
-                leason_start_date = a.start_date
-                end_date = a.end_date
-            except:
-                # it is not, get start_date from int function that figures out next avialable start_date from today, based on weekday of leason
-                leason_start_date = get_firstdate_weekday(leason_weekday, start_date)
-                end_date = semester_info.end_date
+        # Is leason limited by stop/start dates?
+        try:
+            a=db((db.leason.id==leason_id)&(db.leason.limited=="Ja")).select(db.leason.start_date,db.leason.end_date)[0]
+            leason_start_date = a.start_date
+            end_date = a.end_date
+        except:
+            # it is not, set start_date the next available date for this weekday 
+            leason_start_date = get_firstdate_weekday(leason_weekday, start_date)
+            end_date = semester_info.end_date
 
-            leason_dates = []
+        leason_dates = []
 
-            # We will use these lists to search through when we loop
-            canx_leasons = get_cancelled_leasons(cust_id,leason_id)
+        # If the user has already cancelled any dates of this leasons we store it in canx_leasons for later check 
+        canx_leasons = get_cancelled_leasons(cust_id,leason_id)
 
-            while leason_start_date < today:
-            	leason_start_date = leason_start_date + timedelta(days=7)
+        while leason_start_date < today:
+        	leason_start_date = leason_start_date + timedelta(days=7)
 
-            # The Present
-            if leason_start_date == today:
+        # The Present
+        if leason_start_date == today:
+            horse_name = get_horse_info(leason_data.id,leason_start_date,cust_id)
+
+            # reset title, let the exceptions change it if needed
+            title = leason_title 
+            # Do some test to figure out what the title should be 
+            if canxbyadmin(leason_start_date,leason_id):
+                title = canx_by_instructor 
+
+            # See if leason_id, cust_id and cur date matches a cancelled_leason entry
+            if len(db((db.cancelled_leasons.id_customer==cust_id)&(db.cancelled_leasons.id_leason==leason_id)&(db.cancelled_leasons.cancelled_date==leason_start_date)).select()) > 0:
+                title = canx_by_rider 
+
+            # Check if todays leason is too late to cancel
+            if not check_canx_time(leason_data.id):
+                title = too_late_to_canx
+
+            leason_dates.append({
+            "title":title,
+            "horse":horse_name,
+            "time":leason_data.leason_time,
+            "weekday":leason_data.week_day,
+            "leason_id":leason_id,
+            "date":leason_start_date
+            })
+
+            # Must add another week to the variable so the function can keep rolling towards da FuTuRe
+            leason_start_date = leason_start_date + timedelta(days=7)
+
+        # THe Future
+        # La Futura consists of future "blank" dates, future rebookings and future cancelled leasons 
+        # and of leasons cancelled by admin/instrucotr
+        if leason_start_date > today:
+            # Loop until we are at the end of the semester.
+            while leason_start_date <= end_date:
                 horse_name = get_horse_info(leason_data.id,leason_start_date,cust_id)
 
-                # Test if the leason has been cancelled by admin
-                if canxbyadmin(leason_start_date,leason_id):
-                    title = canx_by_instructor 
-                else:
-                    # Check if todays leason is too late to cancel
-                    if check_canx_time(leason_data.id):
-                        title = leason_title 
-                    else: 
-                        title = too_late_to_canx
+                # default 
+                title = leason_title
+
+                # See if leason_id, cust_id and cur date matches a cancelled_leason entry
+                if len(db((db.cancelled_leasons.id_customer==cust_id)&(db.cancelled_leasons.id_leason==leason_id)&(db.cancelled_leasons.cancelled_date==leason_start_date)).select()) > 0:
+                    title = canx_by_rider 
+
+                if canxbyadmin(leason_start_date,leason_data.id):
+                    title = canx_by_instructor
+
                 leason_dates.append({
                 "title":title,
                 "horse":horse_name,
                 "time":leason_data.leason_time,
                 "weekday":leason_data.week_day,
+                "leason_id":leason_id,
                 "date":leason_start_date
                 })
 
-                # Must add another week to the variable so the function can keep rolling towards da FuTuRe
                 leason_start_date = leason_start_date + timedelta(days=7)
 
-            # THe Future
-            # La Futura consists of future "blank" dates, future rebookings and future cancelled leasons 
-            # and of leasons cancelled by admin/instrucotr
-            if leason_start_date > today:
-                # Loop until we are at the end of the semester.
-                while leason_start_date <= end_date:
-                    horse_name = get_horse_info(leason_data.id,leason_start_date,cust_id)
-                    if leason_start_date in canx_leasons:
-                        title = canx_by_rider 
-                    elif canxbyadmin(leason_start_date,leason_data.id):
-                        title = canx_by_instructor
-                    else:
-                        # If we are here, its a regular leason 
-                        title = leason_title
-                        leason_dates.append({
-                        "title":title,
-                        "horse":horse_name,
-                        "time":leason_data.leason_time,
-                        "weekday":leason_data.week_day,
-                        "date":leason_start_date
-                        })
-
-                    leason_start_date = leason_start_date + timedelta(days=7)
-
-            # Now add the list to the master leason list
-            master_leasons.append(leason_dates)
-    except:
-        errormessage = "Unable to select customer leasons!"
+        # Now add the list to the master leason list
+        master_leasons.append(leason_dates)
 
     # Now we have one list for each leason in the master_leasons. We must pop this out and make 
     # one list to rule them all. 
@@ -158,19 +229,27 @@ def list_leasondates(customer):
               "horse":horse_name,
               "time":leason_data.leason_time,
               "weekday":translate_weekday(rebooked_leason["leason_date"].weekday()) ,
+              "leason_id":leason_id,
               "date":rebooked_leason["leason_date"]
                })
 
 
-    ########## LEFT TO DO
     #  # # Sort out any black dates out of the list
+    # This oculd of been donein a more graceful way if we had a dict of dicts instead of a list of dicts.. but i dunno
+    removez = []
+    for leason in newmaster:
+        if leason['date'] in black_dates:
+            removez.append(leason)
+
+    for removezis in removez:
+        newmaster.remove(removezis)
 
     # Try to sort this mess by date
     finalmaster= sorted(newmaster, key=itemgetter('date')) 
 
     return (finalmaster)
 
-def list_rebookings(customer):
+def list_rebookable(customer):
     # But this is really bad. Uberbad. Do not do this. Query the database for the currently
     # logged in users user_id variable directly instead.
     cust_id = customer 
@@ -267,6 +346,7 @@ def list_rebookings(customer):
                     # NO add if the customer is already booked for a reride on leason/date combo 
                     if len(db((db.rebooking.id_leason == leason["leason_id"]) & (db.rebooking.id_customer == cust_id) & (db.rebooking.leason_date == first_leasondate)).select()) != 1:
                         reride_slots.append({
+                            "title":A("Boka igenridning", callback=URL('book_rebooking', vars=dict(confirmed="notyet",cust_id=cust_id,leason_id=leason['leason_id'],leason_date=first_leasondate) ), target='stuffithere'),
                             "date":first_leasondate,
                             "weekday":leason["weekday"],
                             "time":leason["leason_time"],
@@ -275,5 +355,49 @@ def list_rebookings(customer):
 
     final_rerides = sorted(reride_slots, key=itemgetter('date')) 
     return (final_rerides)
+
+
+def book_rebooking():
+    # The function to book a rebooking.
+    cust_id = request.vars['cust_id']
+    leason_id = request.vars['leason_id']
+    leason_date = request.vars['leason_date']
+    confirmed = request.vars['confirmed']
+
+    # Only proceed if there are credits to do this
+    if db.customer[cust_id].credits > 0:
+        if confirmed == "notyet":
+            helper = book_reride_helper 
+            helper += "<br><br>"
+            helper += str(A("Boka igenridning", callback=URL('book_rebooking', vars=dict(confirmed="yep",cust_id=cust_id,leason_id=leason_id,leason_date=leason_date) ), target='stuffithere'))
+            return helper
+        elif db.rebooking.validate_and_insert(id_leason=leason_id, id_customer=cust_id, leason_date=leason_date):
+            alter_credit("subtract",cust_id,1)
+            helper = ""
+            session.flasher = "Igenridningen är bokad!"
+            redirect(URL('rebook'), client_side=True)
+    else:
+        session.flash=("Det går ej att boka igenridning utan igenridningskredit. För att få kredit måste man avboka en lektion.")
+
+
+
+def cancel_leason():
+    #
+    cust_id = request.vars['cust_id']
+    leason_id = request.vars['leason_id']
+    leason_date = request.vars['leason_date']
+    confirmed = request.vars['confirmed']
+
+    if confirmed == "notyet":
+        helper = cancel_leason_helper
+        helper += "<br><br>"
+        helper += str(A("Avboka lektionen", callback=URL('cancel_leason', vars=dict(confirmed="yep",cust_id=cust_id,leason_id=leason_id,leason_date=leason_date) ), target='stuffithere'))
+
+        return helper 
+    elif db.cancelled_leasons.validate_and_insert(id_leason=leason_id, cancelled_date=leason_date, id_customer=cust_id, when_cancelled=datetime.now()):
+        alter_credit("add", cust_id, 1)
+        helper = ""
+        session.flasher = "Lektionen är avbokad"
+        redirect(URL('view'), client_side=True)
 
 
