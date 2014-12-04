@@ -10,3 +10,4 @@ sessions/**
 .sass-cache
 isoweek-1.2.0/**
 .idea/**
+.vagrant/*
