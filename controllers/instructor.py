@@ -75,7 +75,8 @@ class Viewleason:
     def __init__(self, leason_id):
         self.leason_id = leason_id
         self.time = str(db(db.leason.id == leason_id).select(db.leason.leason_time)[0]['leason_time'])[:5]
-        # start to construct the div
+        # start to construct the div, first heading is the time
+        # 
         self.divz = """
         <div class="dg" data-toggle="collapse" data-target="#%s" aria-expanded="true" aria-controls="%s">
             <h4>%s</h4>
