@@ -100,17 +100,19 @@ class Viewleason:
                 <div class="col-md-%s">
                     <div class="list-group">
                         <li class="list-group-item list-group-item-warning">%s</li>\n""" % (col_division, self.leason_date)
+        riders = []
 
         for reg_rider in reg_riders:
             if reg_rider in canx_riders:
-                divclass = "danger"
+                reg_rider["type"] = "danger"
+                riders.append(reg_rider)
             else:
-                divclass = "success"
-            self.divz += "             <a href='#' class='list-group-item list-group-item-%s'>%s %s</a>\n" % (divclass, reg_rider['first_name'], reg_rider['last_name'])
+                reg_rider["type"] = "success"
+                riders.append(reg_rider)
 
         for rebook_rider in rebook_riders:
-            divclass="info"
-            self.divz += "             <a href='#' class='list-group-item list-group-item-%s'>%s %s</a>\n" % (divclass, rebook_rider['first_name'], rebook_rider['last_name'])
+            rebook_rider["type"] = "info"
+            riders.append(rebook_rider)
 
         # Finish the row with empty slots
         if available_slots > 0:
