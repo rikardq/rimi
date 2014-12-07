@@ -27,6 +27,14 @@ What can an instructor do?
 """
 
 def index():
+    ### The variable startday determines which day to base the view dates from. Default is today
+    if session.startday is None:
+        session.startday = today
+    # Set variable from session
+    startday = session.startday 
+
+    week_display()
+
     html_res = ""
     for day in dayz:
         leasons_for_this_day = []
@@ -42,12 +50,13 @@ def index():
     <div id="%s" class="collapse">\n""" % (day, day, day, day)
             for leason in leasons_for_this_day: 
                 # Find first available date for this weekday
-                startdate = get_firstdate_weekday(reverse_translate_weekday(db.leason[leason].week_day), today)
+                startdate = get_firstdate_weekday(reverse_translate_weekday(db.leason[leason].week_day), startday)
 
                 a = Viewleason(leason)
                 startpoint = 0 
 
                 while num_of_date_rows > startpoint: 
+                    # Build a column for this particular weekday, leason and finally actual date
                     a.build_divs(startdate)
                     startpoint = startpoint + 1
                     startdate = startdate + timedelta(+7)
@@ -60,14 +69,56 @@ def index():
     
 
 
-    return dict(html_res=XML(html_res)) 
+    return dict(startday=startday,html_res=XML(html_res)) 
 
 def change_num_of_date_rows(): 
+    # Function to change how many columns or date rows should be displayed. 
     session.num_of_date_rows = request.args(0) 
     # refresh view
     redirect(URL('index'),client_side=True)
 
-    
+def set_master_startdate():
+    # Function to skip x weeks forward. We do this by setting the variable startday
+    session.startday = session.startday + timedelta(+int(request.args(0))) 
+    #session.startday = date(1999,11,1)
+    # refresh view
+    redirect(URL('index'),client_side=True)
+
+def update_week():
+    session.week = int(request.args(0))
+    session.year = int(request.args(1))
+    # refresh view
+    redirect(URL('index'),client_side=True)
+
+def week_display():
+    # Default view is the current week. 
+    if session.week is None:
+        session.week = Week.thisweek()[1]
+        session.year = date.today().year
+
+    week = session.week
+    year = session.year
+
+    # some years end in week 53, others in week 52
+    lastweekofyear = Week.last_week_of_year(year)[1]
+    # If it is the last week of the year, fix forward button
+    if lastweekofyear == week:
+        forward = {"week":1,"year":year + 1}
+    else:
+        forward = {"week":week + 1,"year":year}
+    # If it is the first week of the year, fix back button
+    if week == 1:
+        back = {"week":Week.last_week_of_year(backyear)[1],"year":year - 1}
+    else:
+        back = {"week":week - 1,"year":year}
+
+    # Our startdate will be current week, beginning with monday
+    # set remaining sessions to new values and move on
+    session.startdate = Week(year, week).monday()
+    session.back = back
+    session.forward = forward
+    session.week = week
+    session.year = year 
 
 
 class Viewleason:
@@ -101,19 +152,17 @@ class Viewleason:
                 <div class="col-md-%s">
                     <div class="list-group">
                         <li class="list-group-item list-group-item-warning">%s</li>\n""" % (col_division, self.leason_date)
-        riders = []
-
         for reg_rider in reg_riders:
             if reg_rider in canx_riders:
-                reg_rider["type"] = "danger"
-                riders.append(reg_rider)
+                divclass = "danger"
             else:
-                reg_rider["type"] = "success"
-                riders.append(reg_rider)
+                divclass = "success"
+
+            self.divz += " <a href='#' class='list-group-item list-group-item-%s'>%s %s</a>\n" % (divclass, reg_rider['first_name'], reg_rider['last_name'])
 
         for rebook_rider in rebook_riders:
-            rebook_rider["type"] = "info"
-            riders.append(rebook_rider)
+            divclass="info"
+            self.divz += " <a href='#' class='list-group-item list-group-item-%s'>%s %s</a>\n" % (divclass, rebook_rider['first_name'], rebook_rider['last_name'])
 
         # Finish the row with empty slots
         if available_slots > 0:
