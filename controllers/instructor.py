@@ -35,7 +35,10 @@ def index():
 
     week_display()
 
-    html_res = ""
+    # Start the Tab list
+    tablist = """<ul class="nav nav-tabs" role="tablist">"""
+    # Start the Tab panes
+    tabpanes = """<div class="tab-content">"""
     for day in dayz:
         leasons_for_this_day = []
         for leason in leasons:
@@ -43,11 +46,12 @@ def index():
                 leasons_for_this_day.append(leason.leason_id)
 
         if len(leasons_for_this_day) > 0:
-            html_res += """
-    <div class="dg" data-toggle="collapse" data-target="#%s" aria-expanded="true" aria-controls="%s">
-        <h4>%s</h4> 
-    </div>
-    <div id="%s" class="collapse">\n""" % (day, day, day, day)
+            tablist += """
+            <li role="presentation"><a href="#%s" aria-controls="%s" role="tab" data-toggle="tab">%s</a></li> 
+            \n""" % (day, day, day)
+            # add display tab for this day
+            tabpanes += """<div role="tabpanel" class="tab-pane" id="%s">""" % (day)
+
             for leason in leasons_for_this_day: 
                 # Find first available date for this weekday
                 startdate = get_firstdate_weekday(reverse_translate_weekday(db.leason[leason].week_day), startday)
@@ -62,14 +66,19 @@ def index():
                     startdate = startdate + timedelta(+7)
 
                 a.end_div()
-                # add to html variable
-                html_res += a.divz
-            # finish the div
-            html_res += "</div>"
-    
+                # add to Tab pane 
+                tabpanes += a.divz
+            # End display tab for this day 
+            tabpanes += "</div>"
+
+    # Finish the Tab pane
+    tabpanes += "</div>"
+
+    # Finish the tablist
+    tablist += "</ul>"
 
 
-    return dict(startday=startday,html_res=XML(html_res)) 
+    return dict(startday=startday,tablist=XML(tablist),tabpanes=XML(tabpanes)) 
 
 def change_num_of_date_rows(): 
     # Function to change how many columns or date rows should be displayed. 

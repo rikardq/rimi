@@ -3,9 +3,6 @@
 {{=A('1', callback=URL('update_week', args=[session.back["week"],session.back["year"]]))}}
 <i class="icon-arrow-left"></i>
 </A>
-
-
-Tezta fina fina kolumner hur många killen?: 
 {{=A('1', callback=URL('change_num_of_date_rows', args=['1']))}}
 {{=A('2', callback=URL('change_num_of_date_rows', args=['2']))}}
 {{=A('3', callback=URL('change_num_of_date_rows', args=['3']))}}
@@ -21,17 +18,13 @@ Tezta fina fina kolumner hur många killen?:
     <button type="button" class="btn btn-danger">Avbokad</button>
     <button type="button" class="btn btn-info">Bokad igenridning</button>
     <button type="button" class="btn btn-active">Ledig plats</button>
-
-
-
-
-
-
-{{=html_res}}
-
 </div>
 
-{{=BEAUTIFY(session.startdate)}}
-{{=BEAUTIFY(session.back)}}
-{{=BEAUTIFY(session.forward)}}
+
+
+
+
+
+{{=tablist}}
+{{=tabpanes}}
 
