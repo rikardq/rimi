@@ -7,7 +7,7 @@ leasons = db(db.owner_of_leason.instructor_id==instructor_id).select(db.owner_of
 today=date.today()
 today_wd = today.weekday()
 
-dayz = ["Måndag","Tisdag","Onsdag","Torsdag","Fredag","Lördag","Söndag"]
+dayz = ("Måndag","Tisdag","Onsdag","Torsdag","Fredag","Lördag","Söndag")
 
 ### DISPLAY VARIABLES
 if session.num_of_date_rows is None:
@@ -27,18 +27,17 @@ What can an instructor do?
 """
 
 def index():
+    week_display()
     ### The variable startday determines which day to base the view dates from. Default is today
     if session.startday is None:
         session.startday = today
-    # Set variable from session
-    startday = session.startday 
-
     week_display()
 
-    # Start the Tab list
-    tablist = """<ul class="nav nav-tabs" role="tablist">"""
-    # Start the Tab panes
-    tabpanes = """<div class="tab-content">"""
+
+    # Set variable from session
+    startday = session.startday 
+    master = {}
+
     for day in dayz:
         leasons_for_this_day = []
         for leason in leasons:
@@ -46,11 +45,7 @@ def index():
                 leasons_for_this_day.append(leason.leason_id)
 
         if len(leasons_for_this_day) > 0:
-            tablist += """
-            <li role="presentation"><a href="#%s" aria-controls="%s" role="tab" data-toggle="tab">%s</a></li> 
-            \n""" % (day, day, day)
-            # add display tab for this day
-            tabpanes += """<div role="tabpanel" class="tab-pane" id="%s">""" % (day)
+            master[day] = [] 
 
             for leason in leasons_for_this_day: 
                 # Find first available date for this weekday
@@ -66,30 +61,14 @@ def index():
                     startdate = startdate + timedelta(+7)
 
                 a.end_div()
-                # add to Tab pane 
-                tabpanes += a.divz
-            # End display tab for this day 
-            tabpanes += "</div>"
+                # add to master dict for this day 
+                master[day].append(a.divz)
 
-    # Finish the Tab pane
-    tabpanes += "</div>"
-
-    # Finish the tablist
-    tablist += "</ul>"
-
-
-    return dict(startday=startday,tablist=XML(tablist),tabpanes=XML(tabpanes)) 
+    return dict(startday=startday,master=master) 
 
 def change_num_of_date_rows(): 
     # Function to change how many columns or date rows should be displayed. 
     session.num_of_date_rows = request.args(0) 
-    # refresh view
-    redirect(URL('index'),client_side=True)
-
-def set_master_startdate():
-    # Function to skip x weeks forward. We do this by setting the variable startday
-    session.startday = session.startday + timedelta(+int(request.args(0))) 
-    #session.startday = date(1999,11,1)
     # refresh view
     redirect(URL('index'),client_side=True)
 
@@ -117,13 +96,13 @@ def week_display():
         forward = {"week":week + 1,"year":year}
     # If it is the first week of the year, fix back button
     if week == 1:
-        back = {"week":Week.last_week_of_year(backyear)[1],"year":year - 1}
+        back = {"week":Week.last_week_of_year(year - 1)[1],"year":year - 1}
     else:
         back = {"week":week - 1,"year":year}
 
     # Our startdate will be current week, beginning with monday
     # set remaining sessions to new values and move on
-    session.startdate = Week(year, week).monday()
+    session.startday = Week(year, week).monday()
     session.back = back
     session.forward = forward
     session.week = week

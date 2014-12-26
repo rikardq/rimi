@@ -1,30 +1,41 @@
 {{extend 'layout-customer.html'}}
 
-{{=A('1', callback=URL('update_week', args=[session.back["week"],session.back["year"]]))}}
-<i class="icon-arrow-left"></i>
-</A>
+{{=A('Back', callback=URL('update_week', args=[session.back["week"],session.back["year"]]))}}
+
+{{=session.week}} / 
+{{=session.year}} - 
+{{=session.startday}}
+
+{{=A('Framåt', callback=URL('update_week', args=[session.forward["week"],session.forward["year"]]))}}
+
+<hr>
+
+<ul class="nav nav-tabs" role="tablist">
+{{for day in master:}}
+    <li role="presentation"><a href="#{{=day}}" aria-controls="{{=day}}" role="tab" data-toggle="tab">{{=day}}</a></li>
+{{pass}}
+
+
+</ul>
+
+<div class="tab-content">
+{{for day in master:}}
+    <div role="tabpanel" class="tab-pane" id="{{=day}}">
+    {{for entry in master[day]:}}
+        {{=XML(entry)}}
+    {{pass}}
+    </div>
+{{pass}}
+</div>
+
+<hr>
+
+<small>Antal veckor i displayen: {{=session.num_of_date_rows}}. Ändra:  
 {{=A('1', callback=URL('change_num_of_date_rows', args=['1']))}}
 {{=A('2', callback=URL('change_num_of_date_rows', args=['2']))}}
 {{=A('3', callback=URL('change_num_of_date_rows', args=['3']))}}
 {{=A('4', callback=URL('change_num_of_date_rows', args=['4']))}}
 {{=A('6', callback=URL('change_num_of_date_rows', args=['6']))}}
- SwaG så många --> {{=session.num_of_date_rows}}
+</small>
 
-{{=A('skipzies', callback=URL('set_master_startdate', args=['1']))}}
-
-
-<div class="container-fluid" id="brah">
-    <button type="button" class="btn btn-success">Bokad</button>
-    <button type="button" class="btn btn-danger">Avbokad</button>
-    <button type="button" class="btn btn-info">Bokad igenridning</button>
-    <button type="button" class="btn btn-active">Ledig plats</button>
-</div>
-
-
-
-
-
-
-{{=tablist}}
-{{=tabpanes}}
 
