@@ -21,8 +21,33 @@
 <div class="tab-content">
 {{for day in master:}}
     <div role="tabpanel" class="tab-pane" id="{{=day}}">
-    {{for entry in master[day]:}}
-        {{=XML(entry)}}
+    {{for leason_id in master[day]:}}
+        {{time = str(db(db.leason.id == leason_id).select(db.leason.leason_time)[0]['leason_time'])[:5]}}
+        <div class="dg" data-toggle="collapse" data-target="#{{=leason_id}}" aria-expanded="true" aria-controls="{{=leason_id}}">
+            <h4>{{=time}}</h4>
+        </div>
+
+        <div id="{{=leason_id}}" class="collapse">
+            <div class="row">
+        {{for leason_date in master[day][leason_id]:}}
+                <div class="col-md-{{=col_division}}">
+                    <div class="list-group">
+                        <li class="list-group-item list-group-item-warning">{{=leason_date}}</li>
+            {{for rider,status in master[day][leason_id][leason_date]["riders"].iteritems():}}
+                            <a href='#' class='list-group-item list-group-item-{{=status}}'>{{=rider}}</a>
+            {{pass}}
+            {{for i in range(master[day][leason_id][leason_date]["available_slots"]):}}
+                            <a href='#' class='list-group-item list-group-item-active'>Ledig plats</a>
+            {{pass}}
+                        </li>
+                    </div>
+                </div>
+        {{pass}}
+
+
+
+            </div>
+        </div>
     {{pass}}
     </div>
 {{pass}}
@@ -38,4 +63,5 @@
 {{=A('6', callback=URL('change_num_of_date_rows', args=['6']))}}
 </small>
 
-
+{{=BEAUTIFY(master)}}
+{{=master}}
