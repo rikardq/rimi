@@ -16,14 +16,16 @@ else:
     num_of_date_rows = int(session.num_of_date_rows)
 
 def index():
-    week_display()
+    dayz = ("Måndag","Onsdag","Torsdag","Fredag","Lördag","Söndag")
     ### The variable startday determines which day to base the view dates from. Default is today
     if session.startday is None:
         session.startday = today
+    week_display()
 
     # Set variable from session
     startday = session.startday 
     master = {}
+    sorttime = {}
     # column division for bootstrap. 
     col_division = 12/num_of_date_rows
 
@@ -36,9 +38,13 @@ def index():
                 # Add weekday to master dict since we have a leason for it ,unless its in there already
                 if day not in master:
                     master[day] = {}
+                    sorttime[day] = {}
 
         for leason in leasons_for_this_day: 
             master[day][leason] = {}
+            time = str(db(db.leason.id == leason).select(db.leason.leason_time)[0]['leason_time'])[:5]
+            sorttime[day][time] = leason
+
             # Find first available date for this weekday
             startdate = get_firstdate_weekday(reverse_translate_weekday(db.leason[leason].week_day), startday)
 
@@ -54,7 +60,8 @@ def index():
                 startdate = startdate + timedelta(+7)
 
 
-    return dict(col_division=col_division, startday=startday,master=master) 
+    #return dict(col_division=col_division, startday=startday,master=master) 
+    return locals()
 
 
 def prepped_leason_info(leason_id, leason_date):

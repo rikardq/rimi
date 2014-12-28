@@ -9,10 +9,11 @@
 {{=A('Framåt', callback=URL('update_week', args=[session.forward["week"],session.forward["year"]]))}}
 
 <hr>
-
 <ul class="nav nav-tabs" role="tablist">
-{{for day in master:}}
-    <li role="presentation"><a href="#{{=day}}" aria-controls="{{=day}}" role="tab" data-toggle="tab">{{=day}}</a></li>
+{{for day in dayz:}}
+    {{if day in master:}}
+        <li role="presentation"><a href="#{{=day}}" aria-controls="{{=day}}" role="tab" data-toggle="tab">{{=day}}</a></li>
+    {{pass}}
 {{pass}}
 
 
@@ -21,15 +22,15 @@
 <div class="tab-content">
 {{for day in master:}}
     <div role="tabpanel" class="tab-pane" id="{{=day}}">
-    {{for leason_id in master[day]:}}
-        {{time = str(db(db.leason.id == leason_id).select(db.leason.leason_time)[0]['leason_time'])[:5]}}
+    {{for time in sorted(sorttime[day]):}}
+        {{leason_id = sorttime[day][time]}}
         <div class="dg" data-toggle="collapse" data-target="#{{=leason_id}}" aria-expanded="true" aria-controls="{{=leason_id}}">
             <h4>{{=time}}</h4>
         </div>
 
         <div id="{{=leason_id}}" class="collapse">
             <div class="row">
-        {{for leason_date in master[day][leason_id]:}}
+        {{for leason_date in sorted(master[day][leason_id]):}}
                 <div class="col-md-{{=col_division}}">
                     <div class="list-group">
                         <li class="list-group-item list-group-item-warning">{{=leason_date}}</li>
@@ -43,9 +44,6 @@
                     </div>
                 </div>
         {{pass}}
-
-
-
             </div>
         </div>
     {{pass}}
@@ -64,4 +62,5 @@
 </small>
 
 {{=BEAUTIFY(master)}}
+{{=BEAUTIFY(sorttime)}}
 {{=master}}
