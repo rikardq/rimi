@@ -78,7 +78,8 @@ db.define_table("leason",
       SQLField("limited", "string", label="Är lektionen tidsbegränsad?",requires=IS_IN_SET(['Ja','Nej']), default='Nej'),
       SQLField("start_date", "date", label="Vilket datum börjar lektionen?", default=date.today()),
       SQLField("end_date", "date", label="Vilket datum slutar lektionen?",  default=date.today()),
-      SQLField("leason_type", "string", label="Lektionstyp", requires=IS_IN_SET(['Ponny','Häst','Blandad'])))
+      SQLField("leason_type", "string", label="Lektionstyp", requires=IS_IN_SET(['Ponny','Häst','Blandad'])),
+      format="%(week_day)s %(leason_time)s")
 
 
 #The table that ties one customer to its leasons(one to many)
@@ -93,32 +94,14 @@ db.define_table("admin_cancelled_leason",
       SQLField("leason_date", "date", notnull=True))
 
 
+#Storing all horses associated with the business and their status.
+db.define_table("horse",
+      SQLField("name", "string", label="Namn", notnull=True, default=None),
+      SQLField('image', 'upload'),
+      SQLField("status", "string", requires=IS_IN_SET(['Aktiv','Inaktiv']), default='Inaktiv'),
+      SQLField("horse_type", "string", label="Typ av häst", requires=IS_IN_SET(['Ponny','Häst']), default=None),
+      format="%(name)s")
 
-
-# The history table which contains all historical leasons and their
-# attributes(since attributes of a leason are allowed to change
-# in the future, we keep the historical data here
-db.define_table("leasons_history",
-      SQLField("id_customer", "integer", notnull=True),
-      SQLField("id_leason", "integer", notnull=True),
-      SQLField("id_semester", "integer", notnull=True),
-      SQLField("id_horse", "integer",  default=None),
-      SQLField("id_rebooking", "integer", default=None),
-      SQLField("leason_time", "time", default=None),
-      SQLField("leason_length", "integer", notnull=True),
-      SQLField("skill_level", db.skill_level),
-      SQLField("leason_type", "string", default=None),
-      SQLField("leason_date", "date", notnull=True))
-
-
-
-#Keeps track of any leasons that has been cancelled by the user or
-#an instructor. Uncertain if db.leason.id should be contained here.
-db.define_table("cancelled_leasons",
-      SQLField("id_customer", db.customer),
-      SQLField("id_leason", db.leason),
-      SQLField("cancelled_date", "date", notnull=True, default=None),
-      SQLField("when_cancelled", "datetime", notnull=True, default=None))
 
 
 #Keeps track of requested, denied and confirmed rebookings.
@@ -130,12 +113,25 @@ db.define_table("rebooking",
       SQLField("deny_message", "string"))
 
 
-#Storing all horses associated with the business and their status.
-db.define_table("horse",
-      SQLField("name", "string", label="Namn", notnull=True, default=None),
-      SQLField('image', 'upload'),
-      SQLField("status", "string", requires=IS_IN_SET(['Aktiv','Inaktiv']), default='Inaktiv'),
-      SQLField("horse_type", "string", label="Typ av häst", requires=IS_IN_SET(['Ponny','Häst']), default=None))
+
+# The history table where we stored all "logged" customers at leason point
+db.define_table("leasons_history",
+      SQLField("id_customer", db.customer),
+      SQLField("id_leason", db.leason),
+      SQLField("id_horse", db.horse),
+      SQLField("id_rebooking", db.rebooking),
+      SQLField("leason_date", "date", notnull=True))
+
+
+#Keeps track of any leasons that has been cancelled by the user or
+#an instructor. Uncertain if db.leason.id should be contained here.
+db.define_table("cancelled_leasons",
+      SQLField("id_customer", db.customer),
+      SQLField("id_leason", db.leason),
+      SQLField("cancelled_date", "date", notnull=True, default=None),
+      SQLField("when_cancelled", "datetime", notnull=True, default=None))
+
+
 
 #We store any pre-selected horses in this table for display at appropriate
 #views

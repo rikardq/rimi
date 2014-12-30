@@ -69,9 +69,23 @@ def prepped_leason_info(leason_id, leason_date):
     # returns a dict of customers with their status
     # 
     data = {}
-    num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(leason_date,leason_id)
-    max_customers = int(db(db.leason.id==leason_id).select()[0]['max_customers'])
-    available_slots = max_customers - num_riders - num_rebooks + num_canx 
+
+    # If this date is past or present(but not future) AND there is data in the history
+    # table, we need to pull and display that data.
+    if leason_date <= today and len(db((db.leasons_history.id_leason==leason_id)&(db.leasons_history.leason_date==leason_date)).select()) > 0:
+        reg_riders, canx_riders, rebook_riders = get_leason_history(leason_date,leason_id)
+        # No available slots if this leason is in the past
+        available_slots = 0
+    # If it is the present or the future and there is NO data in the history table, 
+    # we treat it as a leason that has not "occured" yet
+    elif leason_date >= today and len(db((db.leasons_history.id_leason==leason_id)&(db.leasons_history.leason_date==leason_date)).select()) == 0:
+        num_riders,num_rebooks,num_canx,num_total,reg_riders,canx_riders,rebook_riders,leason_time = leason_info(leason_date,leason_id)
+        max_customers = int(db(db.leason.id==leason_id).select()[0]['max_customers'])
+        available_slots = max_customers - num_riders - num_rebooks + num_canx
+    # Remaining combos would be past dates where there are no entries in the historical table. These should be listed as totally blank as
+    else:
+        reg_riders, rebook_riders, canx_riders = [],[],[]
+        available_slots = 0
 
     for reg_rider in reg_riders:
         if reg_rider in canx_riders:

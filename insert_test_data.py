@@ -39,13 +39,6 @@ db.rebooking.insert(id_leason=3,id_customer=1,leason_date="2013-9-4",approval="n
 db.cancelled_leasons.insert(id_customer=1,id_leason=6,cancelled_date="2013-09-14",when_cancelled="2013-10-06 11:33:57")
 db.cancelled_leasons.insert(id_customer=1,id_leason=6,cancelled_date="2013-11-02",when_cancelled="2013-10-06 11:33:57")
 
-db.leasons_history.insert(id_customer=1,id_leason=6,id_semester=1,leason_length=60,leason_date="2013-08-17")
-db.leasons_history.insert(id_customer=1,id_leason=6,id_semester=1,leason_length=60,leason_date="2013-08-24")
-db.leasons_history.insert(id_customer=1,id_leason=6,id_semester=1,leason_length=60,leason_date="2013-08-31")
-db.leasons_history.insert(id_customer=1,id_leason=6,id_semester=1,leason_length=60,leason_date="2013-09-07")
-db.leasons_history.insert(id_customer=1,id_leason=6,id_semester=1,leason_length=60,leason_date="2013-09-21")
-db.leasons_history.insert(id_customer=1,id_leason=6,id_semester=1,leason_length=60,leason_date="2013-09-28")
-
 db.black_dates.insert(black_date="2013-08-20")
 db.black_dates.insert(black_date="2013-09-16")
 db.black_dates.insert(black_date="2013-11-28")

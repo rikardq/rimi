@@ -49,16 +49,6 @@ def get_cancelled_leasons(cust_id,leason_id):
     return xleasons
 
 # This functions usage is questionable, and will be reworked
-def get_leason_history(cust_id,leason_id):
-    xleasons = []
-    q=(db.leasons_history.id_customer==cust_id)&(db.leasons_history.id_leason==leason_id)
-    s=db(q).select(db.leasons_history.leason_date)
-    if len(s) > 0:
-        for entry in s:
-            xleasons.append(entry["leason_date"])
-    return xleasons
-
-# This functions usage is questionable, and will be reworked
 def get_rebooked_leasons(cust_id):
     xleasons = []
     q=(db.rebooking.id_customer==cust_id)
@@ -193,6 +183,28 @@ def get_horse_info(leason_id,leason_date,customer_id):
         horse_name = None
     return horse_name 
 
+# Used to retrieve data from historical leasons
+def get_leason_history(this_date,leason_id):
+    # Regular riders. Excludes any historical entry with a rebooking id.
+    q=(db.leasons_history.id_leason==leason_id)&(db.leasons_history.leason_date==this_date)&(db.leasons_history.id_customer==db.customer.id)&(db.leasons_history.id_rebooking == None)
+
+    reg_riders = db(q).select(db.customer.id, db.customer.first_name, db.customer.last_name)
+
+    # Include any canx rider for this leason/date
+    canx_riders = db((db.cancelled_leasons.id_leason==leason_id) &
+        (db.cancelled_leasons.cancelled_date==this_date) & 
+        (db.customer.id==db.cancelled_leasons.id_customer)).select(db.customer.id,db.customer.first_name,db.customer.last_name)
+
+    # Figure out rebooked riders shiiiit
+    q=(db.leasons_history.id_leason==leason_id)&(db.leasons_history.leason_date==this_date)&(db.leasons_history.id_customer==db.customer.id)&(db.leasons_history.id_rebooking != None)
+    rebook_riders = db(q).select(db.customer.id, db.customer.first_name, db.customer.last_name)
+
+
+    return reg_riders, canx_riders, rebook_riders
+
+
+
+
 def display_horse_pic(horse_name):
   # simply returns image filename
   q = db(db.horse.name==horse_name).select(db.horse.image)
@@ -200,4 +212,15 @@ def display_horse_pic(horse_name):
     return q[0]['image']
   else:
     return False
+
+
+
+
+
+
+
+
+
+
+
 
